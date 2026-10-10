@@ -1,0 +1,45 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['docs/data.json']
+  pull_request:
+    paths-ignore: ['docs/data.json']
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build docs/index.html from src and confirm it is committed
+        run: |
+          python3 scripts/build.py
+          git diff --exit-code docs/index.html
+
+      - name: Unit tests (build anchors, sync allow-list)
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+        env:
+          CI: '1'
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
