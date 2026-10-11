@@ -15,6 +15,8 @@ const ROUNDS=[
 const RBY=Object.fromEntries(ROUNDS.map(r=>[r.id,r]));
 const TEAMBALL=f=>f==='scramble'||f==='altshot';
 const SINGLES=f=>f==='stroke'||f==='match';
+// Captains are fixed to their teams: Bryan Stoddard leads Iron Legends, Cory Adcroft leads Pin Seekers. Not editable in Setup.
+const LOCKED_TEAM={stoddard:'IL',adcroft:'PS'};
 
 // ---------- state ----------
 let db=null,userCap=null,canWrite=null,isAdmin=false,me='';

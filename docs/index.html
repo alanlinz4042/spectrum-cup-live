@@ -250,6 +250,10 @@ input[type=number]{width:64px;text-align:center}
 .prow{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
 .prow .n{font-weight:600}.prow .s{font-size:12px;color:var(--muted)}
 .prow select{font-size:13px;padding:4px}
+.draft{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.dcol{display:flex;flex-direction:column;gap:6px;min-width:0}
+.dhead{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:6px 8px;border-radius:8px}.dcol.ps .dhead{background:var(--ps-soft);color:var(--ps)}.dcol.il .dhead{background:var(--il-soft);color:var(--il);text-align:right}
+.dcol .prow{grid-template-columns:1fr;gap:4px}.dcol.ps .prow{border-color:var(--ps-soft)}.dcol.il .prow{border-color:var(--il-soft);text-align:right}.dcol.il .prow select{justify-self:end}
+.dcol.ps .prow .n{color:var(--ps)}.dcol.il .prow .n{color:var(--il)}.dhead.un{background:var(--line);color:var(--muted);margin:4px 0 8px}
 .pair{display:grid;grid-template-columns:1fr auto 1fr 84px;gap:6px;align-items:center;margin-bottom:6px}
 .pair .teein{width:100%;font-size:13px;padding:5px 6px;text-align:center}
 .pair .teein::placeholder{color:var(--muted);opacity:.8}

@@ -243,6 +243,10 @@ input[type=number]{width:64px;text-align:center}
 .prow{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
 .prow .n{font-weight:600}.prow .s{font-size:12px;color:var(--muted)}
 .prow select{font-size:13px;padding:4px}
+.draft{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.dcol{display:flex;flex-direction:column;gap:6px;min-width:0}
+.dhead{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:6px 8px;border-radius:8px}.dcol.ps .dhead{background:var(--ps-soft);color:var(--ps)}.dcol.il .dhead{background:var(--il-soft);color:var(--il);text-align:right}
+.dcol .prow{grid-template-columns:1fr;gap:4px}.dcol.ps .prow{border-color:var(--ps-soft)}.dcol.il .prow{border-color:var(--il-soft);text-align:right}.dcol.il .prow select{justify-self:end}
+.dcol.ps .prow .n{color:var(--ps)}.dcol.il .prow .n{color:var(--il)}.dhead.un{background:var(--line);color:var(--muted);margin:4px 0 8px}
 .pair{display:grid;grid-template-columns:1fr auto 1fr 84px;gap:6px;align-items:center;margin-bottom:6px}
 .pair .teein{width:100%;font-size:13px;padding:5px 6px;text-align:center}
 .pair .teein::placeholder{color:var(--muted);opacity:.8}
@@ -445,6 +449,8 @@ const ROUNDS=[
 const RBY=Object.fromEntries(ROUNDS.map(r=>[r.id,r]));
 const TEAMBALL=f=>f==='scramble'||f==='altshot';
 const SINGLES=f=>f==='stroke'||f==='match';
+// Captains are fixed to their teams: Bryan Stoddard leads Iron Legends, Cory Adcroft leads Pin Seekers. Not editable in Setup.
+const LOCKED_TEAM={stoddard:'IL',adcroft:'PS'};
 
 // ---------- state ----------
 let db=null,userCap=null,canWrite=null,isAdmin=false,me='';
@@ -780,7 +786,9 @@ function renderPots(){
 function renderSetup(){
   const dis=isAdmin?'':'disabled';
   const ids=Object.keys(players).sort((a,b)=>(teamOf(a)||'Z').localeCompare(teamOf(b)||'Z')||(players[a].captain?-1:players[b].captain?1:0)||players[a].name.localeCompare(players[b].name));
-  $('#roster').innerHTML=ids.length?ids.map(p=>`<div class="prow"><div><div class="n">${esc(players[p].name)}${players[p].captain?' <span class="pill wait">Captain</span>':''}</div><div class="s">${esc(players[p].phone||'')}${players[p].ghin?' · GHIN '+esc(players[p].ghin):''}</div></div><select id="team_${p}" data-team="${p}" ${dis}><option value="">Unassigned</option><option value="PS" ${teamOf(p)==='PS'?'selected':''}>Pin Seekers</option><option value="IL" ${teamOf(p)==='IL'?'selected':''}>Iron Legends</option></select></div>`).join(''):'<div class="empty">No players loaded yet. The roster is seeded by Alan from the tournament guide.</div>';
+  const row=(p,full)=>{const t=teamOf(p);const lock=LOCKED_TEAM[p];const pick=lock?`<span class="pill ${lock==='PS'?'ps':'il'}" title="Captain — team is fixed">Captain</span>`:`<select id="team_${p}" data-team="${p}" ${dis}><option value="">Unassigned</option><option value="PS" ${t==='PS'?'selected':''}>Pin Seekers</option><option value="IL" ${t==='IL'?'selected':''}>Iron Legends</option></select>`;return `<div class="prow"><div><div class="n">${esc(players[p].name)}</div>${full?`<div class="s">${esc(players[p].phone||'')}${players[p].ghin?' · GHIN '+esc(players[p].ghin):''}</div>`:''}</div>${pick}</div>`};
+  const ps=ids.filter(p=>teamOf(p)==='PS'),il=ids.filter(p=>teamOf(p)==='IL'),un=ids.filter(p=>!teamOf(p));
+  $('#roster').innerHTML=ids.length?`<div class="draft"><div class="dcol ps"><div class="dhead">Pin Seekers · ${ps.length}</div>${ps.map(p=>row(p,false)).join('')||'<div class="empty">No picks yet</div>'}</div><div class="dcol il"><div class="dhead">Iron Legends · ${il.length}</div>${il.map(p=>row(p,false)).join('')||'<div class="empty">No picks yet</div>'}</div></div>`+(un.length?`<div class="dhead un">Unassigned · ${un.length}</div><div class="plist">${un.map(p=>row(p,true)).join('')}</div>`:''):'<div class="empty">No players loaded yet. The roster is seeded by Alan from the tournament guide.</div>';
   $('#pairChips').innerHTML=ROUNDS.map(r=>`<button class="chip ${r.id===pairRound?'on':''}" data-pr="${r.id}">R${r.n} <small>${esc(r.course)}</small></button>`).join('');
   const r=RBY[pairRound];const per=SINGLES(r.format)?1:2;const pr=pairings[pairRound]||[];
   const opt=(t,sel)=>`<option value="">—</option>`+Object.keys(players).filter(p=>teamOf(p)===t).sort((a,b)=>players[a].name.localeCompare(players[b].name)).map(p=>`<option value="${p}" ${sel===p?'selected':''}>${esc(players[p].name)}</option>`).join('');
@@ -820,7 +828,7 @@ document.addEventListener('click',e=>{
   const tp=e.target.closest('[data-tp]');if(tp){if(canWrite===false)return;const key=tp.dataset.tp,h=tp.dataset.h;const d=Object.assign({holes:{},tp:{}},scores[key]||{});d.tp=Object.assign({},d.tp);const off=!!d.tp[h];if(off)delete d.tp[h];else d.tp[h]=1;scores[key]=d;tp.classList.toggle('on');queueWrite('scores/'+key,d,{tp:{[h]:off?null:1}});return}
 });
 document.addEventListener('input',e=>{
-  const t=e.target;
+  const t=e.target;if(!isAdmin&&t.closest&&t.closest('#p-setup'))return; // Setup writes are owner/captain only, whatever the DOM says
   if(t.dataset.key){const key=t.dataset.key,h=t.dataset.h;const d=Object.assign({holes:{},tp:{}},scores[key]||{});d.holes=Object.assign({},d.holes);
     let v=null;if(t.value!==''){v=Math.max(1,Math.min(15,parseInt(t.value,10)||0))||null}
     if(v==null)delete d.holes[h];else d.holes[h]=v;
@@ -828,7 +836,7 @@ document.addEventListener('input',e=>{
     if(t.value.length>=2||(+t.value>=2&&+t.value<=9)){const nxt=document.getElementById(`in_${key}_${+h+1}`);if(nxt&&!nxt.disabled)setTimeout(()=>{nxt.focus();nxt.select&&nxt.select()},60)}
     return}
   if(t.dataset.pf){const p=t.dataset.p,f=t.dataset.pf;players[p]=Object.assign({},players[p],{[f]:f==='index'?(t.value===''?null:+t.value):t.value});queueWrite('players/'+p,players[p]);return}
-  if(t.dataset.team){const p=t.dataset.team;players[p]=Object.assign({},players[p],{team:t.value});queueWrite('players/'+p,players[p]);return}
+  if(t.dataset.team){const p=t.dataset.team;if(!isAdmin||LOCKED_TEAM[p])return;players[p]=Object.assign({},players[p],{team:t.value});queueWrite('players/'+p,players[p]);return}
   if(t.dataset.al||t.dataset.sn||t.dataset.mu){const s=JSON.parse(JSON.stringify(settings||{}));if(t.dataset.al){s.allow=s.allow||{};s.allow[t.dataset.al]=+t.value}if(t.dataset.sn){s.snake=s.snake||{};s.snake[t.dataset.sn]=+t.value}if(t.dataset.mu){s.mulligan=s.mulligan||{};s.mulligan[t.dataset.mu]=+t.value}settings=s;queueWrite('config/settings',s);return}
   if(t.dataset.c){const s=JSON.parse(JSON.stringify(settings||{}));s.courses=s.courses||{};const c=s.courses[t.dataset.c]=s.courses[t.dataset.c]||{name:RBY[t.dataset.c].course};const f=t.dataset.f;
     if(f==='par'||f==='si'){c[f]=c[f]||[];c[f][+t.dataset.i]=t.value===''?null:+t.value}else c[f]=f==='tee'?t.value:(t.value===''?null:+t.value);settings=s;queueWrite('config/settings',s);return}
