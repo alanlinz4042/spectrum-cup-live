@@ -321,6 +321,13 @@ input[type=number]{width:64px;text-align:center}
 .csheet .ch .t{font-family:var(--display);font-weight:700;font-size:17px}
 .csheet .ch .who{font-size:13px;color:var(--muted);margin:2px 0 8px}
 .csheet .ch .row .btn{flex:1 1 auto}
+.pp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}.btn.pp-fire{background:var(--gold);color:#12304f;font-size:15px;padding:10px 16px;min-height:44px}.btn.pp-fire.wide{width:100%;margin-top:4px}.btn.pp-fire:disabled{opacity:.5}
+.pp{border:2px solid var(--gold);border-radius:12px;padding:10px 12px;margin-bottom:10px;background:var(--panel);box-shadow:0 2px 8px rgba(0,0,0,.08)}.pp.settled,.pp.void{border-color:var(--line);box-shadow:none}
+.pp-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.pp-t{font-family:var(--display);font-weight:800;font-size:18px;line-height:1.1}.pp-by{font-size:12px;color:var(--muted);margin:2px 0 8px}
+.pp-sides{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pp-side{min-height:52px;border-radius:10px;border:2px solid;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:var(--display)}.pp-side b{font-size:18px;letter-spacing:.06em}.pp-side small{font-size:11px;opacity:.8}
+.pp-side.yes{border-color:var(--green);color:var(--green)}.pp-side.no{border-color:var(--ps);color:var(--ps)}.pp-side.yes.on{background:var(--green);color:#fff}.pp-side.no.on{background:var(--ps);color:#fff}.pp-side:disabled{opacity:.45;cursor:default}
+.pp-who{font-size:12px;color:var(--muted);margin-top:6px}.pp-who .y{color:var(--green);font-weight:700}.pp-who .n{color:var(--ps);font-weight:700}.pp-settle{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.pp-res{font-weight:700;margin-top:4px}.pp-res.yes{color:var(--green)}.pp-res.no{color:var(--ps)}.pp-res.void{color:var(--muted)}
 .btn.go{background:var(--green)}.btn.no{background:transparent;color:var(--ps);border:1px solid var(--ps)}
 /* Live view */
 .lv-round{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
