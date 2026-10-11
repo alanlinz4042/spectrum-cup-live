@@ -217,6 +217,29 @@ class FallbackTests(unittest.TestCase):
         self.assertEqual(d["scores"]["r1_p01"]["holes"]["3"], 3)  # the readable collections are still fresh
         self.assertEqual(d["stale"], ["settings"])
 
+    def test_slimmed_run_carries_unread_sections_without_marking_stale(self):
+        # The scheduled tasks read only scores, side and config/pairings and declare the rest carried.
+        self.drop("players"); self.drop("config", "settings.json"); self.drop("config", "sponsor.json")
+        write(os.path.join(self.dump, "scores", "r1_p01.json"), dict(SCORE, holes={"1": 4, "2": 5, "3": 3}))
+        self.assertEqual(sync.run(self.dump, self.out, listed=("scores", "side"),
+                                  carry=("players", "settings", "sponsor")), "CHANGED")
+        d = self.read_out()
+        self.assertEqual(d["stale"], [])
+        self.assertEqual(d["players"], self.first["players"])
+        self.assertEqual(d["settings"], self.first["settings"])
+        self.assertEqual(d["sponsor"], self.first["sponsor"])
+        self.assertEqual(d["scores"]["r1_p01"]["holes"]["3"], 3)
+
+    def test_carried_section_present_in_dump_is_exported_fresh(self):
+        self.drop("config", "settings.json")
+        self.assertEqual(sync.run(self.dump, self.out, carry=("players", "settings", "sponsor")), "UNCHANGED")
+
+    def test_carry_without_previous_still_exits_2(self):
+        self.drop("players"); os.remove(self.out)
+        with self.assertRaises(SystemExit) as cm:
+            sync.run(self.dump, self.out, carry=("players",))
+        self.assertEqual(cm.exception.code, 2)
+
     def test_missing_whole_config_falls_back_for_all_three_docs(self):
         self.drop("config")
         self.assertEqual(sync.run(self.dump, self.out), "CHANGED stale=settings,pairings,sponsor")
