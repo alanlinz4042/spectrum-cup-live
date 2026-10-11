@@ -24,8 +24,10 @@ export class BoardPage {
   readonly liveCourseMarks: Locator;
   readonly liveRoundTitles: Locator;
   readonly liveMatches: Locator;
+  readonly liveMatchStatuses: Locator;
   readonly cupRoundLogos: Locator;
   readonly privateSurfaces: Locator;
+  readonly injectedImages: Locator;
 
   constructor(readonly page: Page) {
     this.status = page.locator('#status');
@@ -48,8 +50,10 @@ export class BoardPage {
     this.liveCourseMarks = page.locator('.lv-head .cmark');
     this.liveRoundTitles = page.locator('.lv-head .t');
     this.liveMatches = page.locator('.lv-m');
+    this.liveMatchStatuses = page.locator('.lv-m .thru');
     this.cupRoundLogos = page.locator('.cup-round .clogo');
     this.privateSurfaces = page.locator('#meSel, #pickme, #p-score, #p-pots, #p-setup, #p-hcp');
+    this.injectedImages = page.locator('img[src="x"], img[onerror]');
   }
 
   /** Navigate and wait for the first data.json pull to land (the boot notice is cleared by pull()). */
@@ -69,6 +73,16 @@ export class BoardPage {
   async open(name: TabName) {
     await this.tab(name).click();
     await this.page.locator(`#p-${name.toLowerCase()}.on`).waitFor();
+  }
+
+  /** Status line ("Thru 9", "Tee 8:10 AM", "Not started") of the nth match on the selected Live day. */
+  liveMatchStatus(index: number) {
+    return this.liveMatchStatuses.nth(index);
+  }
+
+  /** Eyebrow ("Match N[ · Tee …]") of the nth match card on round `n` (1-based) of the Cup tab. */
+  cupMatchEyebrow(round: number, index: number) {
+    return this.page.locator('.cup-round').nth(round - 1).locator('.mcard .eyebrow').nth(index);
   }
 
   day(id: 'wed' | 'thu' | 'fri' | 'sat') {

@@ -119,6 +119,23 @@ class SyncTests(unittest.TestCase):
         self.assertNotIn("<i>", d["side"]["mulligans"])
         self.assertNotIn("<", self.read_out())
 
+    def test_tee_time_is_validated(self):
+        write(os.path.join(self.dump, "config", "pairings.json"),
+              {"r1": [{"PS": ["p01"], "IL": ["p09"], "tee": " 8:10 AM "},
+                      {"PS": [], "IL": [], "tee": "<img src=x onerror=alert(1)>"},
+                      {"PS": [], "IL": [], "tee": "8:10 AM" + "x" * 43},
+                      {"PS": [], "IL": [], "tee": "12:40"},
+                      {"PS": [], "IL": [], "tee": 810},
+                      {"PS": [], "IL": []}]})
+        self.run_sync()
+        d = json.loads(self.read_out())
+        m = d["pairings"]["r1"]
+        self.assertEqual(m[0], {"PS": ["p01"], "IL": ["p09"], "tee": "8:10 AM"})
+        self.assertEqual(m[3]["tee"], "12:40")
+        for i in (1, 2, 4, 5):
+            self.assertNotIn("tee", m[i], i)
+        self.assertNotIn("<", self.read_out())
+
     def test_second_run_is_unchanged_and_does_not_rewrite(self):
         self.run_sync()
         before = os.stat(self.out)
