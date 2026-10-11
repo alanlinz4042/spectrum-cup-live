@@ -72,6 +72,7 @@ h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.05}
 .me.need select{border-color:#ff6b61;box-shadow:0 0 0 3px rgba(255,107,97,.35),0 0 14px rgba(255,107,97,.6);animation:needglow 1.6s ease-in-out infinite}
 @keyframes needglow{0%,100%{box-shadow:0 0 0 3px rgba(255,107,97,.35),0 0 14px rgba(255,107,97,.6)}50%{box-shadow:0 0 0 3px rgba(255,107,97,.15),0 0 4px rgba(255,107,97,.3)}}
 @media (prefers-reduced-motion:reduce){.me.need select{animation:none}}
+[hidden]{display:none!important}
 .pickme{background:#fbe6e4;color:#8f2420;border-left:4px solid #ff6b61;padding:10px 12px;border-radius:6px;margin:10px 16px 0;font-size:14px;display:flex;align-items:center;gap:8px}
 .pickme b{font-family:var(--display);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 .pickme .arrow{font-size:18px;line-height:1}
@@ -245,9 +246,16 @@ input[type=number]{width:64px;text-align:center}
 .prow select{font-size:13px;padding:4px}
 .draft{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.dcol{display:flex;flex-direction:column;gap:6px;min-width:0}
 .dhead{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:6px 8px;border-radius:8px}.dcol.ps .dhead{background:var(--ps-soft);color:var(--ps)}.dcol.il .dhead{background:var(--il-soft);color:var(--il);text-align:right}
+.pool{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}.pool .prow{grid-template-columns:1fr auto;gap:8px}
+.pick{display:flex;gap:6px}.pick button{min-width:52px;min-height:40px;border-radius:8px;border:2px solid;background:transparent;font-family:var(--display);font-weight:800;font-size:14px;letter-spacing:.06em;cursor:pointer}
+.pick .toPS{border-color:var(--ps);color:var(--ps)}.pick .toIL{border-color:var(--il);color:var(--il)}.pick button:active{transform:scale(.96)}.pick button:disabled{opacity:.35;cursor:default}
+.dcol .act{display:flex;gap:6px;justify-content:flex-start}.dcol.il .act{justify-content:flex-end}.dcol .act button{min-height:32px;padding:0 10px;border-radius:7px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer}.dcol .act button:disabled{display:none}
+.dhead .ok{float:right;opacity:.8}.dcol.il .dhead .ok{float:left}
 .dcol .prow{grid-template-columns:1fr;gap:4px}.dcol.ps .prow{border-color:var(--ps-soft)}.dcol.il .prow{border-color:var(--il-soft);text-align:right}.dcol.il .prow select{justify-self:end}
 .dcol.ps .prow .n{color:var(--ps)}.dcol.il .prow .n{color:var(--il)}.dhead.un{background:var(--line);color:var(--muted);margin:4px 0 8px}
-.pair{display:grid;grid-template-columns:1fr auto 1fr 84px;gap:6px;align-items:center;margin-bottom:6px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start;margin-bottom:8px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.pair .mh{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px}.pair .mh .eyebrow{margin:0}.pair .mh .teein{width:104px}
+.pair .col{display:flex;flex-direction:column;gap:6px}.pair .col.il select{text-align:right}
 .pair .teein{width:100%;font-size:13px;padding:5px 6px;text-align:center}
 .pair .teein::placeholder{color:var(--muted);opacity:.8}
 .pair select{width:100%;font-size:13px;padding:5px}
@@ -786,14 +794,18 @@ function renderPots(){
 function renderSetup(){
   const dis=isAdmin?'':'disabled';
   const ids=Object.keys(players).sort((a,b)=>(teamOf(a)||'Z').localeCompare(teamOf(b)||'Z')||(players[a].captain?-1:players[b].captain?1:0)||players[a].name.localeCompare(players[b].name));
-  const row=(p,full)=>{const t=teamOf(p);const lock=LOCKED_TEAM[p];const pick=lock?`<span class="pill ${lock==='PS'?'ps':'il'}" title="Captain — team is fixed">Captain</span>`:`<select id="team_${p}" data-team="${p}" ${dis}><option value="">Unassigned</option><option value="PS" ${t==='PS'?'selected':''}>Pin Seekers</option><option value="IL" ${t==='IL'?'selected':''}>Iron Legends</option></select>`;return `<div class="prow"><div><div class="n">${esc(players[p].name)}</div>${full?`<div class="s">${esc(players[p].phone||'')}${players[p].ghin?' · GHIN '+esc(players[p].ghin):''}</div>`:''}</div>${pick}</div>`};
+  const side=Object.keys(players).length/2|0;
+  const assigned=(p)=>{const t=teamOf(p);const lock=LOCKED_TEAM[p];return `<div class="prow"><div><div class="n">${esc(players[p].name)}</div></div>${lock?`<span class="pill ${lock==='PS'?'ps':'il'}" title="Captain — team is fixed">Captain</span>`:`<div class="act"><button data-draft="${p}" data-to="${t==='PS'?'IL':'PS'}" ${dis} title="Move to the other team">⇄ Swap</button><button data-draft="${p}" data-to="" ${dis} title="Back to the pool">× Drop</button></div>`}</div>`};
+  const poolRow=(p)=>`<div class="prow"><div><div class="n">${esc(players[p].name)}</div><div class="s">${esc(players[p].phone||'')}${players[p].ghin?' · GHIN '+esc(players[p].ghin):''}${players[p].index!=null?' · idx '+esc(players[p].index):''}</div></div><div class="pick"><button class="toPS" data-draft="${p}" data-to="PS" ${dis} aria-label="Draft to Pin Seekers">PS</button><button class="toIL" data-draft="${p}" data-to="IL" ${dis} aria-label="Draft to Iron Legends">IL</button></div></div>`;
   const ps=ids.filter(p=>teamOf(p)==='PS'),il=ids.filter(p=>teamOf(p)==='IL'),un=ids.filter(p=>!teamOf(p));
-  $('#roster').innerHTML=ids.length?`<div class="draft"><div class="dcol ps"><div class="dhead">Pin Seekers · ${ps.length}</div>${ps.map(p=>row(p,false)).join('')||'<div class="empty">No picks yet</div>'}</div><div class="dcol il"><div class="dhead">Iron Legends · ${il.length}</div>${il.map(p=>row(p,false)).join('')||'<div class="empty">No picks yet</div>'}</div></div>`+(un.length?`<div class="dhead un">Unassigned · ${un.length}</div><div class="plist">${un.map(p=>row(p,true)).join('')}</div>`:''):'<div class="empty">No players loaded yet. The roster is seeded by Alan from the tournament guide.</div>';
+  const head=(t,n)=>`<div class="dhead">${t==='PS'?'Pin Seekers':'Iron Legends'} · ${n}/${side}${n>=side?'<span class="ok">✓</span>':''}</div>`;
+  $('#roster').innerHTML=ids.length?(un.length?`<div class="eyebrow" style="margin-bottom:6px">Draft pool · ${un.length} left · tap a team to pick</div><div class="pool">${un.map(poolRow).join('')}</div>`:`<div class="eyebrow" style="margin-bottom:8px">Draft complete · every player has a team</div>`)+`<div class="draft"><div class="dcol ps">${head('PS',ps.length)}${ps.map(assigned).join('')||'<div class="empty">No picks yet</div>'}</div><div class="dcol il">${head('IL',il.length)}${il.map(assigned).join('')||'<div class="empty">No picks yet</div>'}</div></div>`:'<div class="empty">No players loaded yet. The roster is seeded by Alan from the tournament guide.</div>';
   $('#pairChips').innerHTML=ROUNDS.map(r=>`<button class="chip ${r.id===pairRound?'on':''}" data-pr="${r.id}">R${r.n} <small>${esc(r.course)}</small></button>`).join('');
   const r=RBY[pairRound];const per=SINGLES(r.format)?1:2;const pr=pairings[pairRound]||[];
-  const opt=(t,sel)=>`<option value="">—</option>`+Object.keys(players).filter(p=>teamOf(p)===t).sort((a,b)=>players[a].name.localeCompare(players[b].name)).map(p=>`<option value="${p}" ${sel===p?'selected':''}>${esc(players[p].name)}</option>`).join('');
+  const usedIn={};pr.forEach((m,mi)=>['PS','IL'].forEach(t=>(m[t]||[]).forEach(p=>{if(p)usedIn[p]=mi})));
+  const opt=(t,sel,mi)=>`<option value="">${t==='PS'?'— Pin Seeker —':'— Iron Legend —'}</option>`+Object.keys(players).filter(p=>teamOf(p)===t).sort((a,b)=>players[a].name.localeCompare(players[b].name)).map(p=>`<option value="${p}" ${sel===p?'selected':''}>${esc(pname(p,true))}${usedIn[p]!=null&&usedIn[p]!==mi?` · in M${usedIn[p]+1}`:''}</option>`).join('');
   let h=`<div class="eyebrow" style="margin-bottom:8px">${esc(r.fmt)} · ${r.matches} matches · ${per} per side · tee times optional (e.g. 8:10 AM)</div>`;
-  for(let i=0;i<r.matches;i++){const m=pr[i]||{};h+=`<div class="pair"><div>${Array.from({length:per},(_,j)=>`<select class="psb" id="pp_${pairRound}_${i}_PS_${j}" data-pair="${i}" data-t="PS" data-j="${j}" ${dis}>${opt('PS',(m.PS||[])[j])}</select>`).join('')}</div><div class="vs" style="font-family:var(--display);color:var(--muted)">M${i+1}</div><div>${Array.from({length:per},(_,j)=>`<select class="ilb" id="pp_${pairRound}_${i}_IL_${j}" data-pair="${i}" data-t="IL" data-j="${j}" ${dis}>${opt('IL',(m.IL||[])[j])}</select>`).join('')}</div><input type="text" class="teein" id="pt_${pairRound}_${i}" data-tee="${i}" maxlength="10" placeholder="Tee time" value="${esc(m.tee||'')}" ${dis}></div>`}
+  for(let i=0;i<r.matches;i++){const m=pr[i]||{};h+=`<div class="pair"><div class="mh"><div class="eyebrow">Match ${i+1}</div><input type="text" class="teein" id="pt_${pairRound}_${i}" data-tee="${i}" maxlength="10" placeholder="Tee time" value="${esc(m.tee||'')}" ${dis}></div><div class="col ps">${Array.from({length:per},(_,j)=>`<select class="psb" id="pp_${pairRound}_${i}_PS_${j}" data-pair="${i}" data-t="PS" data-j="${j}" ${dis}>${opt('PS',(m.PS||[])[j],i)}</select>`).join('')}</div><div class="col il">${Array.from({length:per},(_,j)=>`<select class="ilb" id="pp_${pairRound}_${i}_IL_${j}" data-pair="${i}" data-t="IL" data-j="${j}" ${dis}>${opt('IL',(m.IL||[])[j],i)}</select>`).join('')}</div></div>`}
   // duplicates warning
   const all=[];pr.forEach(m=>['PS','IL'].forEach(t=>(m[t]||[]).forEach(p=>p&&all.push(p))));const dup=all.filter((p,i)=>all.indexOf(p)!==i);
   if(dup.length)h+=`<div class="notice">Listed twice this round: ${[...new Set(dup)].map(p=>esc(pname(p))).join(', ')}</div>`;
@@ -825,6 +837,7 @@ document.addEventListener('click',e=>{
   const ub=e.target.closest('[data-unback]');if(ub){const id=ub.dataset.unback;if(!me||!bets[id])return;const b=JSON.parse(JSON.stringify(bets[id]));if(b.backs)delete b.backs[me];bets[id]=b;queueWrite('bets/'+id,b);renderBets();return}
   const st=e.target.closest('[data-settle]');if(st){const id=st.dataset.settle;const b0=bets[id];if(!b0||betStatus(b0)!=='open'||!(isAdmin||b0.aPid===me||b0.by===me||b0.bPid===me))return;const b=JSON.parse(JSON.stringify(bets[id]));b.status='settled';b.winner=st.dataset.w;b.settledAt=Date.now();bets[id]=b;queueWrite('bets/'+id,b);renderBets();return}
   const pc=e.target.closest('[data-pr]');if(pc){pairRound=pc.dataset.pr;renderSetup();return}
+  const dr=e.target.closest('[data-draft]');if(dr){if(!isAdmin||dr.disabled)return;const p=dr.dataset.draft;if(LOCKED_TEAM[p])return;players[p]=Object.assign({},players[p],{team:dr.dataset.to});queueWrite('players/'+p,players[p]);renderSetup();return}
   const tp=e.target.closest('[data-tp]');if(tp){if(canWrite===false)return;const key=tp.dataset.tp,h=tp.dataset.h;const d=Object.assign({holes:{},tp:{}},scores[key]||{});d.tp=Object.assign({},d.tp);const off=!!d.tp[h];if(off)delete d.tp[h];else d.tp[h]=1;scores[key]=d;tp.classList.toggle('on');queueWrite('scores/'+key,d,{tp:{[h]:off?null:1}});return}
 });
 document.addEventListener('input',e=>{
