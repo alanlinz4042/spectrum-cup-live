@@ -81,7 +81,7 @@ async function pull(){
     players=d.players||{};settings=d.settings||null;pairings=d.pairings||{};scores=d.scores||{};side=d.side||{};
     sponsor=safeSponsor(d.sponsor);logos=safeLogos(d.logos);
     applyLogos();tickStrip();render();setStatus('');
-    const n=$('#syncNote');if(n&&d.updatedAt){try{n.textContent=' · scores as of '+new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'}).format(new Date(d.updatedAt))+' CT'}catch(e){}}
+    const n=$('#syncNote');if(n&&d.updatedAt){try{n.textContent=' · scores as of '+new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'}).format(new Date(d.updatedAt))+' CT'+(Array.isArray(d.stale)&&d.stale.length?' (partial refresh)':'')}catch(e){}}
   }catch(e){if(!lastText)setStatus('Scores are not available right now. Refresh in a minute.')}
 }
 pull();setInterval(pull,POLL_MS);

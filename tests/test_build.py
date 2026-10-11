@@ -78,6 +78,10 @@ class SecurityHardening(unittest.TestCase):
     def test_player_tally_cells_do_not_wrap(self):
         self.assertIn("#ptally td,#ptally th{white-space:nowrap}", transformed())
 
+    def test_sync_note_flags_partial_refresh(self):
+        out = transformed()
+        self.assertIn("(Array.isArray(d.stale)&&d.stale.length?' (partial refresh)':'')", out)
+
 
 if __name__ == "__main__":
     unittest.main()

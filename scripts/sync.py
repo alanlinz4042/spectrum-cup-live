@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 """Export an artifact-DB dump to docs/data.json using an explicit allow-list.
 
-Usage: python3 scripts/sync.py --dump .dump --out docs/data.json
-Prints CHANGED or UNCHANGED. Exit 2 if config/settings.json is missing. Never prints document contents.
+Usage: python3 scripts/sync.py --dump /home/claude/dump --out docs/data.json [--listed players,scores,side,config]
+Prints CHANGED or UNCHANGED (first token), followed by " stale=<sections>" when any section was carried over
+from the previous output. Exit 2 when neither the dump nor the previous output has settings or players.
+Never prints document contents.
 
-Input layout (what `ArtifactData list ... out_dir=.dump` writes): <dump>/<collection>/<doc_id>.json,
+Input layout (what `ArtifactData list/get ... out_dir=<dump>` writes): <dump>/<collection>/<doc_id>.json,
 each file either the bare document or a {"id","data","version"} wrapper. Stdlib only.
+
+Fallback: a collection whose read was denied leaves no directory (or config doc) in the dump. Such a section
+is reused from the existing --out file and named in "stale". `--listed` names the collections the caller
+confirmed it read successfully: for those, an absent scores/side directory or config doc is genuinely empty.
+`players` is never trusted empty. Only an existing scores/side directory (even empty) counts as read.
 """
 import argparse
 import datetime
@@ -159,22 +166,42 @@ def export_sponsor(s):
     return out
 
 
-def build(dump):
-    settings = load_config(dump, "settings")
-    if settings is None:
-        print("sync.py: missing config/settings.json", file=sys.stderr)
-        sys.exit(2)
-    players = load_collection(dump, "players")
-    scores = load_collection(dump, "scores")
-    side = load_collection(dump, "side")
+def players_present(dump):
+    return bool(glob.glob(os.path.join(dump, "players", "*.json")))
+
+
+def build(dump, previous=None, listed=()):
+    """Export the dump; sections missing from it come from `previous` (the last output) and are named in stale."""
+    previous = previous if isinstance(previous, dict) else {}
+    stale = []
+
+    def section(name, collection, present, fresh, default, required=False, trust_listed=True):
+        if present:
+            return fresh()
+        if (not (trust_listed and collection in listed)) and previous.get(name) is not None:
+            stale.append(name)
+            return previous[name]
+        if required:
+            print("sync.py: missing %s and no previous output to fall back to" % name, file=sys.stderr)
+            sys.exit(2)
+        return default
+
     return {
-        "players": {pid: export_player(p) for pid, p in players.items()},
-        "settings": export_settings(settings),
-        "pairings": export_pairings(load_config(dump, "pairings") or {}),
-        "scores": {k: export_score(d) for k, d in scores.items()},
-        "side": export_side(side),
-        "sponsor": export_sponsor(load_config(dump, "sponsor")),
+        "players": section("players", "players", players_present(dump),
+                           lambda: {pid: export_player(p) for pid, p in load_collection(dump, "players").items()},
+                           None, required=True, trust_listed=False),
+        "settings": section("settings", "config", load_config(dump, "settings") is not None,
+                            lambda: export_settings(load_config(dump, "settings")), None, required=True),
+        "pairings": section("pairings", "config", load_config(dump, "pairings") is not None,
+                            lambda: export_pairings(load_config(dump, "pairings")), {}),
+        "scores": section("scores", "scores", os.path.isdir(os.path.join(dump, "scores")),
+                          lambda: {k: export_score(d) for k, d in load_collection(dump, "scores").items()}, {}),
+        "side": section("side", "side", os.path.isdir(os.path.join(dump, "side")),
+                        lambda: export_side(load_collection(dump, "side")), {}),
+        "sponsor": section("sponsor", "config", load_config(dump, "sponsor") is not None,
+                           lambda: export_sponsor(load_config(dump, "sponsor")), None),
         "logos": dict(LOGOS),
+        "stale": stale,
     }
 
 
@@ -186,34 +213,43 @@ def now_iso():
     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def run(dump, out_path):
-    data = build(dump)
-    previous = None
-    if os.path.exists(out_path):
-        try:
-            with open(out_path, encoding="utf-8") as f:
-                previous = json.load(f)
-        except (OSError, ValueError):
-            previous = None
-    if isinstance(previous, dict):
+def load_previous(out_path):
+    if not os.path.exists(out_path):
+        return None
+    try:
+        with open(out_path, encoding="utf-8") as f:
+            previous = json.load(f)
+    except (OSError, ValueError):
+        return None
+    return previous if isinstance(previous, dict) else None
+
+
+def run(dump, out_path, listed=()):
+    previous = load_previous(out_path)
+    data = build(dump, previous, tuple(listed))
+    suffix = " stale=" + ",".join(data["stale"]) if data["stale"] else ""
+    if previous is not None:
         prev = dict(previous)
         prev.pop("updatedAt", None)
         if canon(prev) == canon(data):
-            return "UNCHANGED"
+            return "UNCHANGED" + suffix
     data["updatedAt"] = now_iso()
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(canon(data))
         f.write("\n")
-    return "CHANGED"
+    return "CHANGED" + suffix
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--dump", required=True, help="directory written by ArtifactData list out_dir")
     ap.add_argument("--out", default="docs/data.json")
+    ap.add_argument("--listed", default="",
+                    help="comma-separated collections read successfully (absent scores/side dir or config doc = empty)")
     args = ap.parse_args(argv)
-    print(run(args.dump, args.out))
+    listed = tuple(c.strip() for c in args.listed.split(",") if c.strip())
+    print(run(args.dump, args.out, listed))
     return 0
 
 

@@ -64,9 +64,32 @@ Pushes that only touch `docs/data.json` (the sync commits) skip CI.
 ## Keeping the data fresh
 
 `scripts/SYNC_PROMPT.md` is the prompt for a scheduled Claude session. Each run dumps the artifact's
-`players`, `scores`, `side` and `config` collections to a git-ignored `.dump/`, runs `scripts/sync.py`, and
-commits `docs/data.json` only when something changed. `tests/test_sync.py` is the contract: nothing from the
+`players`, `scores` and `side` collections plus the `config/settings`, `config/pairings` and `config/sponsor`
+documents to `/home/claude/dump` (outside the clone), runs `scripts/sync.py --dump /home/claude/dump --listed <collections it read>`,
+and commits `docs/data.json` only when something changed. Each run also writes a status record to the board's
+`synclog/last` document so the organizer can see what happened. `tests/test_sync.py` is the contract: nothing from the
 list `phone ghin club email mulligan snake entry __seen gfm pot` can reach the public file.
+
+### When a collection read is denied
+
+The scheduled session's permission classifier occasionally denies one `ArtifactData` call while the others
+succeed, so the dump is missing that collection. Rather than publishing nothing, `sync.py` loads the existing
+`--out` file as `previous` and fills each missing section from it, recording the section name in the output's
+`stale` list (empty when everything was fresh; the page shows ` (partial refresh)` after the sync time while
+it is non-empty). A change in staleness alone is published; `updatedAt` alone is not.
+
+| Section | Source in the dump | Missing: default rule | Missing: collection in `--listed` |
+|---|---|---|---|
+| `settings` | `config/settings.json` | `previous.settings` (stale), else exit 2 | exit 2 |
+| `pairings` | `config/pairings.json` | `previous.pairings` (stale), else `{}` | `{}` |
+| `sponsor` | `config/sponsor.json` | `previous.sponsor` (stale), else `null` | `null` |
+| `players` | `players/` with ≥ 1 file | `previous.players` (stale), else exit 2 | same (an empty roster is never trusted) |
+| `scores` | `scores/` directory | `previous.scores` (stale), else `{}` | `{}` |
+| `side` | `side/` directory | `previous.side` (stale), else `{}` | `{}` |
+
+An existing but empty `scores/` or `side/` directory is genuinely empty (`{}`). `--listed` names the
+collections the caller confirmed it read successfully, because `ArtifactData list` writes no directory at all
+for a collection with zero documents; without it, an absent directory is treated as a denied read.
 
 ## Refreshing the page after the artifact changes
 
