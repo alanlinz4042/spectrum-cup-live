@@ -320,6 +320,7 @@ input[type=number]{width:64px;text-align:center}
 .pp-sides{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pp-side{min-height:52px;border-radius:10px;border:2px solid;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:var(--display)}.pp-side b{font-size:18px;letter-spacing:.06em}.pp-side small{font-size:11px;opacity:.8}
 .pp-side.yes{border-color:var(--green);color:var(--green)}.pp-side.no{border-color:var(--ps);color:var(--ps)}.pp-side.yes.on{background:var(--green);color:#fff}.pp-side.no.on{background:var(--ps);color:#fff}.pp-side:disabled{opacity:.45;cursor:default}
 .pp-who{font-size:12px;color:var(--muted);margin-top:6px}.pp-who .y{color:var(--green);font-weight:700}.pp-who .n{color:var(--ps);font-weight:700}.pp-settle{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.holes{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;-webkit-overflow-scrolling:touch}.hchip{flex:0 0 auto;min-width:40px;min-height:40px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font-family:var(--display);font-weight:700;font-size:14px;cursor:pointer}.hchip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
 .pp-res{font-weight:700;margin-top:4px}.pp-res.yes{color:var(--green)}.pp-res.no{color:var(--ps)}.pp-res.void{color:var(--muted)}
 .btn.go{background:var(--green)}.btn.no{background:transparent;color:var(--ps);border:1px solid var(--ps)}
 /* Live view */
@@ -649,6 +650,12 @@ function renderChallenges(){const box=$('#csheet');if(!me||!db){box.hidden=true;
 const PROP_PRESETS=['Makes this putt','Misses this putt','Hits it OB','Makes birdie','Gets up & down','Finds the water','Three-putts'];
 const PROP_STAKES=[5,10,20];const PROP_LIVE_MS=10*60*1000;
 let propSheet=null; // {pid,prop,stake,custom} while the composer is open
+function todayRounds(){return (DAYS.find(d=>d.k===(liveDay||todayKey()))||DAYS[0]).rounds}
+function playerSpot(pid,rid){ // {mi,next,done} for pid in round rid: next = first unscored hole
+  const r=RBY[rid];const pr=pairings[rid]||[];const mi=pr.findIndex(m=>[...(m.PS||[]),...(m.IL||[])].includes(pid));if(mi<0)return {mi:-1,next:1,done:false};
+  const c=computeMatch(rid,mi);const played=c.holes.filter(x=>x.w).map(x=>x.h);const last=played.length?Math.max(...played):0;return {mi,next:Math.min(last+1,r.holes),done:last>=r.holes}}
+function defaultSpot(pid){const rs=todayRounds();let rid=rs.find(x=>!playerSpot(pid,x).done)||rs[rs.length-1];return {rid,hole:playerSpot(pid,rid).next}}
+function propWhere(b){const r=RBY[b.rid];return r?`R${r.n} ${esc(r.course.replace(' Par 3',''))}${b.hole?' · H'+b.hole:''}`:''}
 function propSides(b){const y=Object.keys(b.yes||{}).filter(p=>b.yes[p]),n=Object.keys(b.no||{}).filter(p=>b.no[p]);return {y,n}}
 function propPayout(b){ // winners split the losers' stakes evenly; one empty side = void
   const s=propSides(b);const w=b.result?s.y:s.n,l=b.result?s.n:s.y;if(!w.length||!l.length)return null;const pot=l.length*(+b.stake||0);const each=pot/w.length;return {w,l,pot,each}}
@@ -664,7 +671,7 @@ function propCard(id,b,compact){const s=propSides(b);const st=b.status||'open';c
   else if(st==='settled'){const p=propPayout(b);body=`<div class="pp-res ${b.result?'yes':'no'}">${b.result?'✓ YES':'✗ NO'}${p?` — ${p.w.map(x=>esc(pname(x,true))).join(', ')} collect $${(+p.each.toFixed(2))} each from ${p.l.map(x=>esc(pname(x,true))).join(', ')}`:' — no action (one side was empty)'}</div>`}
   else body=`<div class="pp-res void">Voided</div>`;
   const age=Date.now()-(b.created||0);const ago=age<60000?'just now':Math.round(age/60000)+' min ago';
-  return `<div class="pp ${st}"><div class="pp-head"><div class="pp-t">${propTitle(b)}</div><span class="pill ${st==='open'?'live':'tie'}">$${b.stake}</span></div><div class="pp-by">${esc(pname(b.by,true))} · ${ago}${compact?'':' · '+(st==='open'?'open':st)}</div>${body}</div>`}
+  return `<div class="pp ${st}"><div class="pp-head"><div class="pp-t">${propTitle(b)}</div><span class="pill ${st==='open'?'live':'tie'}">$${b.stake}</span></div><div class="pp-by">${propWhere(b)?`<b>${propWhere(b)}</b> · `:''}${esc(pname(b.by,true))} · ${ago}${compact?'':' · '+(st==='open'?'open':st)}</div>${body}</div>`}
 function renderProps(){const box=$('#propArea');if(!box)return;const now=Date.now();
   const live=Object.keys(bets).filter(id=>bets[id].kind==='prop'&&((bets[id].status||'open')==='open'&&now-(bets[id].created||0)<PROP_LIVE_MS||(bets[id].status==='settled'&&now-(bets[id].settledAt||0)<90000))).sort((a,b)=>(bets[b].created||0)-(bets[a].created||0));
   const btn=db&&canWrite!==false?`<button class="btn pp-fire" id="propBtn" ${me?'':'disabled'}>⚡ Prop bet${me?'':' · pick your name first'}</button>`:'';
@@ -673,21 +680,23 @@ function renderPropsPots(){const box=$('#propPots');if(!box)return;const list=Ob
   if(!list.length){box.innerHTML='<div class="empty">No props yet. Fire one from the Live tab when someone\'s over a putt.</div>';return}
   const net={};list.forEach(id=>{const b=bets[id];if(b.status!=='settled')return;const p=propPayout(b);if(!p)return;p.w.forEach(x=>{net[x]=(net[x]||0)+p.each});p.l.forEach(x=>{net[x]=(net[x]||0)-(+b.stake||0)})});
   const ids=Object.keys(net).sort((a,b)=>net[b]-net[a]);
-  box.innerHTML=(ids.length?`<div class="scroll"><table><tr><th>Player</th><th class="r">Props net</th></tr>${ids.map(p=>`<tr><td>${esc(pname(p))}</td><td class="r num" style="color:${net[p]>=0?'var(--green)':'var(--ps)'}">${net[p]>=0?'+':'−'}$${Math.abs(net[p]).toFixed(2).replace(/\.00$/,'')}</td></tr>`).join('')}</table></div>`:'')+list.map(id=>propCard(id,bets[id],false)).join('');}
-function openPropSheet(){if(!me)return;propSheet={pid:'',prop:PROP_PRESETS[0],stake:5,custom:''};renderPropSheet()}
+  const groups=[];list.forEach(id=>{const b=bets[id];const r=RBY[b.rid];const key=r?`${r.day} · R${r.n} ${r.course}`:'Unplaced';let g=groups.find(x=>x.key===key);if(!g){g={key,ids:[]};groups.push(g)}g.ids.push(id)});
+  box.innerHTML=(ids.length?`<div class="scroll"><table><tr><th>Player</th><th class="r">Props net</th></tr>${ids.map(p=>`<tr><td>${esc(pname(p))}</td><td class="r num" style="color:${net[p]>=0?'var(--green)':'var(--ps)'}">${net[p]>=0?'+':'−'}$${Math.abs(net[p]).toFixed(2).replace(/\.00$/,'')}</td></tr>`).join('')}</table></div>`:'')+groups.map(g=>`<div class="eyebrow" style="margin:12px 0 6px">${esc(g.key)}</div>`+g.ids.sort((a,b)=>(bets[a].hole||0)-(bets[b].hole||0)||(bets[a].created||0)-(bets[b].created||0)).map(id=>propCard(id,bets[id],false)).join('')).join('');}
+function openPropSheet(){if(!me)return;const sp=defaultSpot(me);propSheet={pid:'',prop:PROP_PRESETS[0],stake:5,custom:'',rid:sp.rid,hole:sp.hole};renderPropSheet()}
 function renderPropSheet(){const box=$('#psheet');if(!propSheet){box.hidden=true;box.innerHTML='';return}
   // my group first (everyone in my match today), then the rest
   const grp=new Set();const today=(DAYS.find(d=>d.k===(liveDay||todayKey()))||DAYS[0]).rounds;ROUNDS.filter(r=>today.includes(r.id)).forEach(r=>(pairings[r.id]||[]).forEach(m=>{const g=[...(m.PS||[]),...(m.IL||[])];if(g.includes(me))g.forEach(p=>grp.add(p))}));
   const ids=Object.keys(players).sort((a,b)=>(grp.has(b)-grp.has(a))||players[a].name.localeCompare(players[b].name));
-  const S=propSheet;const ok=S.pid&&(S.prop||S.custom.trim());
+  const S=propSheet;const ok=S.pid&&(S.prop||S.custom.trim())&&S.rid&&S.hole;const rr=RBY[S.rid]||RBY[todayRounds()[0]];
   box.hidden=false;box.innerHTML=`<div class="sheet-bg" data-psclose="1"><div class="csheet" role="dialog" aria-label="Fire a prop bet" data-psin="1"><div class="row" style="justify-content:space-between"><h2 style="margin:0">⚡ Prop bet</h2><button class="btn ghost sm" data-psclose="1">Close</button></div>
 <div class="eyebrow" style="margin:10px 0 6px">Who</div><div class="chips" style="margin-bottom:8px">${ids.map(p=>`<button class="chip ${S.pid===p?'on':''}" data-pspid="${p}">${esc(pname(p,true))}${grp.has(p)&&p!==me?' <small>·grp</small>':''}</button>`).join('')}</div>
 <div class="eyebrow" style="margin:6px 0">What</div><div class="chips" style="margin-bottom:6px">${PROP_PRESETS.map(t=>`<button class="chip ${S.prop===t?'on':''}" data-psprop="${esc(t)}">${esc(t)}</button>`).join('')}</div><input type="text" id="psCustom" maxlength="60" placeholder="…or type your own (e.g. chips in from the bunker)" value="${esc(S.custom)}" style="width:100%">
+<div class="eyebrow" style="margin:10px 0 6px">Where</div><div class="chips" style="margin-bottom:6px">${todayRounds().map(x=>`<button class="chip ${S.rid===x?'on':''}" data-psrid="${x}">R${RBY[x].n} <small>${esc(RBY[x].course.replace(' Par 3',''))}</small></button>`).join('')}</div><div class="holes">${Array.from({length:rr.holes},(_,i)=>i+1).map(h=>`<button class="hchip ${S.hole===h?'on':''}" data-pshole="${h}">${h}</button>`).join('')}</div>
 <div class="eyebrow" style="margin:10px 0 6px">Stake · each loser pays this to the winners</div><div class="chips">${PROP_STAKES.map(v=>`<button class="chip ${S.stake===v?'on':''}" data-psstake="${v}">$${v}</button>`).join('')}</div>
-<div class="foot" style="margin:0 0 8px">${S.pid?`<b>${esc(pname(S.pid,true))} ${esc(S.custom.trim()||S.prop)}</b> · $${S.stake} · you're automatically on <b>YES</b>`:'Pick a player.'}</div>
+<div class="foot" style="margin:0 0 8px">${S.pid?`<b>${esc(pname(S.pid,true))} ${esc(S.custom.trim()||S.prop)}</b> · R${rr.n} H${S.hole} · $${S.stake} · you're automatically on <b>YES</b>`:'Pick a player.'}</div>
 <button class="btn pp-fire wide" id="psFire" ${ok?'':'disabled'}>Fire it 🔥</button></div></div>`;}
 function fireProp(){const S=propSheet;if(!S||!S.pid||!me||canWrite===false)return;const prop=(S.custom.trim()||S.prop).slice(0,60);const id='p'+Date.now().toString(36);
-  const doc={kind:'prop',by:me,pid:S.pid,prop,stake:S.stake,created:Date.now(),status:'open',yes:{[me]:1},no:{}};bets[id]=doc;queueWrite('bets/'+id,doc);propSheet=null;renderPropSheet();renderProps();if(tab!=='live'){tab='live';document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab==='live'));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-live'));render()}}
+  const doc={kind:'prop',by:me,pid:S.pid,prop,stake:S.stake,rid:S.rid,hole:S.hole,day:(DAYS.find(d=>d.rounds.includes(S.rid))||{}).k||'',created:Date.now(),status:'open',yes:{[me]:1},no:{}};bets[id]=doc;queueWrite('bets/'+id,doc);propSheet=null;renderPropSheet();renderProps();if(tab!=='live'){tab='live';document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab==='live'));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-live'));render()}}
 setInterval(()=>{if(tab==='live'&&Object.keys(bets).some(id=>bets[id].kind==='prop'))renderProps()},30000);
 
 // ---------- rendering ----------
@@ -896,7 +905,9 @@ document.addEventListener('click',e=>{
   if(e.target.id==='propBtn'){openPropSheet();return}
   if(e.target.id==='psFire'){fireProp();return}
   const psc=e.target.closest('[data-psclose]');if(psc&&!e.target.closest('[data-psin]')||e.target.closest('button[data-psclose]')){propSheet=null;renderPropSheet();return}
-  const pp=e.target.closest('[data-pspid]');if(pp&&propSheet){propSheet.pid=pp.dataset.pspid;renderPropSheet();return}
+  const pp=e.target.closest('[data-pspid]');if(pp&&propSheet){propSheet.pid=pp.dataset.pspid;const sp=defaultSpot(propSheet.pid);propSheet.rid=sp.rid;propSheet.hole=sp.hole;renderPropSheet();return}
+  const prd=e.target.closest('[data-psrid]');if(prd&&propSheet){propSheet.rid=prd.dataset.psrid;propSheet.hole=playerSpot(propSheet.pid||me,propSheet.rid).next;renderPropSheet();return}
+  const phl=e.target.closest('[data-pshole]');if(phl&&propSheet){propSheet.hole=+phl.dataset.pshole;renderPropSheet();return}
   const ppr=e.target.closest('[data-psprop]');if(ppr&&propSheet){propSheet.prop=ppr.dataset.psprop;propSheet.custom='';renderPropSheet();return}
   const pst=e.target.closest('[data-psstake]');if(pst&&propSheet){propSheet.stake=+pst.dataset.psstake;renderPropSheet();return}
   const ps=e.target.closest('[data-prop]');if(ps){if(!me||canWrite===false||ps.disabled)return;const id=ps.dataset.prop,side=ps.dataset.side,b=bets[id];if(!b||(b.status||'open')!=='open')return;const n=JSON.parse(JSON.stringify(b));n.yes=n.yes||{};n.no=n.no||{};const on=!!n[side][me];n.yes[me]=null;n.no[me]=null;if(!on)n[side][me]=1;bets[id]=n;queueWrite('bets/'+id,n,{yes:{[me]:n.yes[me]||null},no:{[me]:n.no[me]||null}});renderProps();return}
