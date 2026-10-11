@@ -97,7 +97,7 @@ HEAD = ('<!doctype html>\n<html lang="en" data-theme="light">\n<head>\n<meta cha
         '<meta name="robots" content="noindex">\n' + CSP_META + '\n')
 
 # Strings that must not survive into the public page: artifact plumbing, private tabs, PII fields, wagers.
-FORBIDDEN = ("/_blob/", "meSel", "claude.use", 'data-tab="score"', "p-score", "p-hcp", "p-pots", "p-setup",
+FORBIDDEN = ("/_blob/", "meSel", "claude.use", "propArea", "renderProps", "data-prop", 'data-tab="score"', "p-score", "p-hcp", "p-pots", "p-setup",
              ".phone", ".ghin", ".club", "bets[", "pressNotes", "queueWrite('bets",
              "data-press", "data-tp", "data-accept", "data-settle", "data-back", "data-pair", "data-comp", "data-mul")
 
@@ -133,6 +133,12 @@ def transform(t):
         t = rm_line(t, tab)
     # R4 pickme banner + challenge sheet
     t = rm_line(t, '<div class="pickme" id="pickme" hidden>')
+    # R4b prop bets (private): the Live placeholder, its render call, the composer sheet and the Pots card
+    t = rm_line(t, '<div id="propArea"></div>')
+    t = rm_line(t, '  renderProps();')
+    t = rm_line(t, '<div id="psheet" hidden></div>')
+    t = rm_line(t, '<div class="card"><h2>⚡ Props</h2>')
+    t = rm_line(t, "setInterval(()=>{if(tab==='live'&&Object.keys(bets).some(id=>bets[id].kind==='prop'))renderProps()},30000);")
     t = rm_line(t, '<div id="csheet" hidden></div>')
     # R5 private panels
     for pid in ("p-score", "p-hcp", "p-pots", "p-setup"):

@@ -29,4 +29,20 @@ test.describe('privacy', { tag: '@security' }, () => {
     await board.open('Cup');
     expect(await board.renderedText()).toContain(PRIVATE.phone);
   });
+
+  test('prop bets and wagers never appear on the public page, even if data.json carried them', async ({ board, data, serveData, page }) => {
+    await serveData(data.withLeakedBets());
+    await board.goto();
+    for (const tab of ['Live', 'Cup'] as const) {
+      await board.open(tab);
+      if (tab === 'Live') await board.day('thu').click();
+      const text = await board.renderedText();
+      const html = await board.renderedHtml();
+      for (const needle of ['Makes this putt', 'Prop bet', 'beats Ironwood', 'YES', 'Wager']) {
+        expect.soft(text, `${tab} shows ${needle}`).not.toContain(needle);
+      }
+      expect.soft(html).not.toMatch(/data-prop|propArea|psheet|propPots|class="pp\b/);
+    }
+    expect(await page.locator('#propArea, #psheet, #propPots, .pp, .pp-fire').count()).toBe(0);
+  });
 });

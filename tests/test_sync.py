@@ -10,7 +10,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 import sync  # noqa: E402
 
-FORBIDDEN = ("phone", "ghin", "club", "email", "mulligan", "snake", "entry", "__seen", "gfm", "pot", "comps", "note")
+FORBIDDEN = ("phone", "ghin", "club", "email", "mulligan", "snake", "entry", "__seen", "gfm", "pot", "comps", "note",
+             "bets", "prop", "stake", "wager")
 
 PLAYER = {"name": "Test Player", "team": "PS", "captain": 1, "index": "11.4",
           "phone": "555-0100", "ghin": "1234567", "club": "Secret CC", "email": "x@example.com"}
@@ -46,6 +47,7 @@ def make_dump(root, wrapped=False):
     write(os.path.join(root, "scores", "r1_p01.json"), doc("r1_p01", SCORE))
     write(os.path.join(root, "side", "mulligans.json"), doc("mulligans", MULL))
     write(os.path.join(root, "side", "comps.json"), doc("comps", COMPS))
+    write(os.path.join(root, "bets", "p1.json"), doc("p1", {"kind": "prop", "by": "p01", "pid": "p09", "prop": "Makes this putt", "stake": 5, "yes": {"p01": 1}}))
 
 
 class SyncTests(unittest.TestCase):

@@ -79,6 +79,14 @@ export class FixtureData {
     return d;
   }
 
+  /** A data.json that (wrongly) carries the private bets collection, including an open prop. */
+  withLeakedBets(): any {
+    const d = this.base();
+    d.bets = { p1: { kind: 'prop', by: 'p01', pid: 'p09', prop: 'Makes this putt', stake: 5, rid: 'r1', hole: 7, status: 'open', yes: { p01: 1 }, no: {} },
+               b1: { title: 'Alder beats Ironwood Friday', aPid: 'p01', bPid: 'p09', stake: 20, status: 'open', backs: {} } };
+    return d;
+  }
+
   /** Fixture published while one or more collections could not be read (sync.py fell back to the last copy). */
   withStale(sections: string[]): any {
     const d = this.base();
