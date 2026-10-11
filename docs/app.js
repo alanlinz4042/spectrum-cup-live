@@ -18,6 +18,10 @@ const SINGLES=f=>f==='stroke'||f==='match';
 
 // ---------- state ----------
 let db=null,userCap=null,canWrite=null,isAdmin=false,me='';
+// Everyone who scores is an Editor (the share menu's only writing tier), so Setup is gated on identity instead:
+// the owner always, otherwise an Editor who has picked a captain's name. Honor system among friends; the DB still needs Editor.
+let ownerCap=false,editorCap=false;
+function refreshAdmin(){const was=isAdmin;isAdmin=ownerCap||(editorCap&&!!(players[me]&&players[me].captain));return was!==isAdmin}
 // Can this viewer edit the given score column? Admins always; otherwise only their own name (soft mode) or anyone in the match (group mode).
 function mayEdit(colPids){if(canWrite===false)return false;if(isAdmin)return true;const mode=(settings&&settings.entry)||'self';if(mode==='group')return true;return !!me&&colPids.includes(me)}
 let players={},settings=null,pairings={},scores={},side={};
