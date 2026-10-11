@@ -11,6 +11,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "src", "spectrum-cup.html")
 OUT = os.path.join(ROOT, "docs", "index.html")
+OUT_JS = os.path.join(ROOT, "docs", "app.js")
 
 
 class AnchorError(RuntimeError):
@@ -52,7 +53,23 @@ def rm_block(text, start, end):
     return text[:i] + text[j + len(end):]
 
 
+def rm_until(text, start, end):
+    """Remove from `start` up to (not including) the first `end` after it."""
+    once(text, start)
+    i = text.index(start)
+    j = text.find(end, i)
+    if j < 0:
+        raise AnchorError("block end not found after start: %r" % start[:80])
+    return text[:i] + text[j:]
+
+
 POLLER = r"""setStatus('Loading scores…');
+// data.json is untrusted: only same-origin logo paths and https sponsor links get anywhere near src/href/url().
+const SAFE_IMG=/^logos\/[a-z0-9_-]+\.png$/;
+const safePath=v=>typeof v==='string'&&SAFE_IMG.test(v)?v:'';
+const safeUrl=v=>typeof v==='string'&&/^https:\/\//.test(v)?v:'';
+const safeLogos=o=>{const out={};if(o&&typeof o==='object')Object.keys(o).forEach(k=>{const v=safePath(o[k]);if(v)out[k]=v});return out};
+const safeSponsor=o=>o&&typeof o==='object'?{name:String(o.name||''),url:safeUrl(o.url),imageId:safePath(o.imageId)}:null;
 const POLL_MS=Math.max(1000,+(new URLSearchParams(location.search).get('poll'))||60000);
 let lastText='';
 async function pull(){
@@ -62,7 +79,7 @@ async function pull(){
     const text=await r.text();if(text===lastText)return;lastText=text;
     const d=JSON.parse(text);
     players=d.players||{};settings=d.settings||null;pairings=d.pairings||{};scores=d.scores||{};side=d.side||{};
-    sponsor=d.sponsor||null;logos=d.logos||null;
+    sponsor=safeSponsor(d.sponsor);logos=safeLogos(d.logos);
     applyLogos();tickStrip();render();setStatus('');
     const n=$('#syncNote');if(n&&d.updatedAt){try{n.textContent=' · scores as of '+new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'}).format(new Date(d.updatedAt))+' CT'}catch(e){}}
   }catch(e){if(!lastText)setStatus('Scores are not available right now. Refresh in a minute.')}
@@ -70,11 +87,33 @@ async function pull(){
 pull();setInterval(pull,POLL_MS);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')pull()});"""
 
+CSP_META = ('<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'self\'; '
+            'style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; '
+            'img-src \'self\' data:; connect-src \'self\'; base-uri \'none\'; form-action \'none\'; object-src \'none\'">')
+
 HEAD = ('<!doctype html>\n<html lang="en" data-theme="light">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
-        '<meta name="robots" content="noindex">\n')
+        '<meta name="robots" content="noindex">\n' + CSP_META + '\n')
 
-FORBIDDEN = ("/_blob/", "meSel", "claude.use", 'data-tab="score"', "p-score", "p-hcp", "p-pots", "p-setup")
+# Strings that must not survive into the public page: artifact plumbing, private tabs, PII fields, wagers.
+FORBIDDEN = ("/_blob/", "meSel", "claude.use", 'data-tab="score"', "p-score", "p-hcp", "p-pots", "p-setup",
+             ".phone", ".ghin", ".club", "bets[", "pressNotes", "queueWrite('bets",
+             "data-press", "data-tp", "data-accept", "data-settle", "data-back", "data-pair", "data-comp", "data-mul")
+
+# Private-view functions with no caller on the live/cup paths (F10). Each is removed from its `function` line
+# up to the next top-level anchor; the anchors double as a check that the artifact's layout has not drifted.
+DEAD_FUNCTIONS = (
+    ("function pressNotes(rid){", "\n// ---------- wagers ----------"),
+    ("// ---------- wagers ----------\n", "\n// ---------- rendering ----------"),  # betOdds betStatus sideName renderBets renderChallenges
+    ("function renderScore(){", "\nfunction renderHcp(){"),
+    ("function renderHcp(){", "\nfunction snakeGroups(){"),  # snakeGroups stays: roundHighlights uses it
+    ("function renderPots(){", "\nfunction renderSetup(){"),
+    ("function renderSetup(){", "\n// ---------- events ----------"),
+    # click handler: keep the tab switch and the Live day picker, drop every private-panel branch
+    ("  const rc=e.target.closest('[data-r]');", "});\ndocument.addEventListener('input',"),
+    ("document.addEventListener('input',e=>{", "document.addEventListener('toggle',"),  # score/roster/course inputs
+    ("document.addEventListener('change',e=>{", "// ---------- persistence ----------"),  # setup selects + refreshSheet
+)
 
 
 def transform(t):
@@ -103,6 +142,15 @@ def transform(t):
     # R8 render dispatch
     t = sub(t, "function render(){renderTally();({live:renderLive,cup:renderCup,score:renderScore,hcp:renderHcp,pots:renderPots,setup:renderSetup})[tab]();}",
             "function render(){renderTally();(({live:renderLive,cup:renderCup})[tab]||renderCup)();}")
+    # S1 (F1) team is an enum: whitelist at the single accessor so every interpolation of teamOf() is inert
+    t = sub(t, "function teamOf(pid){return (players[pid]||{}).team||''}",
+            "function teamOf(pid){const t=(players[pid]||{}).team;return t==='PS'||t==='IL'?t:''}")
+    # S2 (F10) dead private renderers, wager code and their handlers
+    for start, end in DEAD_FUNCTIONS:
+        t = rm_until(t, start, end)
+    t = rm_line(t, "window.__pageBets=()=>JSON.parse(JSON.stringify(bets));")
+    # S3 player tally: keep cells on one line at phone widths (the table scrolls inside .scroll)
+    t = sub(t, "</style>", "#ptally td,#ptally th{white-space:nowrap}\n</style>")
     # R9 blob URLs -> relative paths from data.json
     for a in ("`/_blob/${esc(s.imageId)}`", "`/_blob/${esc(L.event)}`", "url(/_blob/${esc(L.PS)})",
               "url(/_blob/${esc(L.IL)})", "`/_blob/${esc(L[rid])}`", 'src="/_blob/${esc(L[t])}"'):
@@ -130,17 +178,29 @@ def transform(t):
     return t
 
 
+def split_script(page):
+    """Move the single inline <script> to app.js so the CSP can be script-src 'self' (F3). Returns (html, js)."""
+    start, end = "<script>\n", "</script>\n"
+    once(page, start)
+    once(page, end)
+    i = page.index(start) + len(start)
+    j = page.index(end, i)
+    js = page[i:j]
+    return page[:i - len(start)] + '<script src="app.js" defer></script>\n' + page[j + len(end):], js
+
+
 def main():
     with open(SRC, encoding="utf-8") as f:
         src = f.read()
     try:
-        out = transform(src)
+        html, js = split_script(transform(src))
     except AnchorError as e:
         print("build.py: %s" % e, file=sys.stderr)
         return 1
-    with open(OUT, "w", encoding="utf-8") as f:
-        f.write(out)
-    print("built %s (%d bytes)" % (os.path.relpath(OUT, ROOT), len(out.encode("utf-8"))))
+    for path, out in ((OUT, html), (OUT_JS, js)):
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(out)
+        print("built %s (%d bytes)" % (os.path.relpath(path, ROOT), len(out.encode("utf-8"))))
     return 0
 
 

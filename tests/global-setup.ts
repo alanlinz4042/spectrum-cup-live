@@ -8,6 +8,8 @@ const BACKUP = path.join(ROOT, 'docs', 'data.json.bak');
 const FIXTURE = path.join(ROOT, 'scripts', 'sample-data.json');
 
 export default async function globalSetup() {
+  // A backup left behind by an interrupted run is the real file; restore it before taking a new backup.
+  if (fs.existsSync(BACKUP)) fs.copyFileSync(BACKUP, LIVE);
   if (fs.existsSync(LIVE)) fs.copyFileSync(LIVE, BACKUP);
   fs.copyFileSync(FIXTURE, LIVE);
   return () => {

@@ -11,18 +11,18 @@ it from `docs/data.json`, which a scheduled Claude session refreshes from the ar
 
 ```
 src/spectrum-cup.html      verbatim copy of the artifact page (never edited by hand)
-scripts/build.py           src → docs/index.html by anchored, once-only string edits; aborts if an anchor moved
+scripts/build.py           src → docs/index.html + docs/app.js by anchored, once-only string edits; aborts if an anchor moved
 scripts/sync.py            artifact DB dump → docs/data.json through an explicit allow-list (no phone / GHIN / club)
 scripts/sample-data.json   fictitious fixture used by the tests (PS 6 – IL 0)
 scripts/SYNC_PROMPT.md     prompt for the scheduled sync session (artifact URL is set in the task, not here)
-docs/                      what GitHub Pages serves: index.html, data.json, logos/, .nojekyll
+docs/                      what GitHub Pages serves: index.html (with CSP), app.js, data.json, logos/, .nojekyll
 tests/                     unittest (build anchors, sync allow-list) + Playwright (chromium, phone-393, phone-320)
 ```
 
 ## Run it locally
 
 ```
-python3 scripts/build.py                     # regenerate docs/index.html
+python3 scripts/build.py                     # regenerate docs/index.html and docs/app.js
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 npm ci && npm test                           # Playwright; serves docs/ on :4173 with the fixture as data.json
 cp scripts/sample-data.json docs/data.json && python3 -m http.server 4173 -d docs   # then open http://localhost:4173/?poll=5000
@@ -61,5 +61,5 @@ list `phone ghin club email mulligan snake entry __seen gfm pot` can reach the p
 2. `python3 scripts/build.py` — it fails loudly if one of its anchors no longer occurs exactly once; fix the
    rule in `scripts/build.py` (never `docs/index.html` by hand) and rerun.
 3. `python3 -m unittest discover -s tests -p 'test_*.py'` and `npm test`.
-4. Commit `src/`, `scripts/build.py` (if changed) and `docs/index.html` together. CI re-runs the build and fails
-   if the committed `docs/index.html` is stale.
+4. Commit `src/`, `scripts/build.py` (if changed), `docs/index.html` and `docs/app.js` together. CI re-runs the
+   build and fails if the committed `docs/index.html` or `docs/app.js` is stale.

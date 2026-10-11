@@ -10,7 +10,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 import sync  # noqa: E402
 
-FORBIDDEN = ("phone", "ghin", "club", "email", "mulligan", "snake", "entry", "__seen", "gfm", "pot")
+FORBIDDEN = ("phone", "ghin", "club", "email", "mulligan", "snake", "entry", "__seen", "gfm", "pot", "comps", "note")
 
 PLAYER = {"name": "Test Player", "team": "PS", "captain": 1, "index": "11.4",
           "phone": "555-0100", "ghin": "1234567", "club": "Secret CC", "email": "x@example.com"}
@@ -83,8 +83,41 @@ class SyncTests(unittest.TestCase):
         self.assertEqual(d["pairings"], PAIRINGS)
         self.assertEqual(d["scores"]["r1_p01"], {"holes": {"1": 4, "2": 5}, "tp": {"2": 1}})
         self.assertEqual(d["side"]["mulligans"]["p01"], {"used": True, "round": "r1", "hole": 7})
-        self.assertEqual(d["side"]["comps"], COMPS)
+        self.assertNotIn("comps", d["side"])  # free-text comps are never published
         self.assertTrue(d["updatedAt"].endswith("Z"))
+
+    def test_team_is_whitelisted(self):
+        write(os.path.join(self.dump, "players", "p02.json"), dict(PLAYER, team='"><img src=x onerror=alert(1)>'))
+        write(os.path.join(self.dump, "players", "p03.json"), dict(PLAYER, team="ps"))
+        write(os.path.join(self.dump, "players", "p04.json"), dict(PLAYER, team=None))
+        self.run_sync()
+        d = json.loads(self.read_out())
+        self.assertEqual(d["players"]["p01"]["team"], "PS")
+        self.assertEqual(d["players"]["p09"]["team"], "IL")
+        for pid in ("p02", "p03", "p04"):
+            self.assertEqual(d["players"][pid]["team"], "", pid)
+        self.assertNotIn("onerror", self.read_out())
+
+    def test_holes_and_tp_are_coerced_to_hole_number_ints(self):
+        junk = {"holes": {"1": 4, "02": 5, "x": 6, "19": 4, "0": 3, "3": "<b>7</b>", "4": "5", "5": 4.0,
+                          "6": 99, "7": True, "8": None, "<img>": 4},
+                "tp": {"2": 1, "3": "yes", "4": 0, "20": 1, "<s>": 1, "5": True}}
+        write(os.path.join(self.dump, "scores", "r1_p01.json"), junk)
+        self.run_sync()
+        d = json.loads(self.read_out())
+        self.assertEqual(d["scores"]["r1_p01"], {"holes": {"1": 4, "2": 5, "4": 5, "5": 4}, "tp": {"2": 1, "3": 1, "5": 1}})
+        self.assertNotIn("<", self.read_out())
+
+    def test_mulligans_are_coerced(self):
+        write(os.path.join(self.dump, "side", "mulligans.json"),
+              {"p01": {"used": 1, "round": "r9", "hole": "7"}, "p09": {"used": "", "round": "r3", "hole": 25},
+               "<i>": {"used": True, "round": "<b>", "hole": 3}})
+        self.run_sync()
+        d = json.loads(self.read_out())
+        self.assertEqual(d["side"]["mulligans"]["p01"], {"used": True, "hole": 7})
+        self.assertEqual(d["side"]["mulligans"]["p09"], {"used": False, "round": "r3"})
+        self.assertNotIn("<i>", d["side"]["mulligans"])
+        self.assertNotIn("<", self.read_out())
 
     def test_second_run_is_unchanged_and_does_not_rewrite(self):
         self.run_sync()

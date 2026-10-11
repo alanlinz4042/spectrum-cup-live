@@ -12,6 +12,7 @@ import datetime
 import glob
 import json
 import os
+import re
 import sys
 
 LOGOS = {"event": "logos/event.png", "PS": "logos/ps.png", "IL": "logos/il.png",
@@ -19,6 +20,8 @@ LOGOS = {"event": "logos/event.png", "PS": "logos/ps.png", "IL": "logos/il.png",
          "r4": "logos/r4.png", "r5": "logos/r5.png", "r6": "logos/r6.png"}
 COURSE_KEYS = ("name", "par", "si", "rating", "slope", "tee")
 ALLOW_KEYS = ("altshot", "scrambleHigh", "scrambleLow")
+TEAMS = ("PS", "IL")
+ROUND_IDS = ("r1", "r2", "r3", "r4", "r5", "r6")
 
 
 def load_doc(path):
@@ -54,10 +57,29 @@ def to_float(v):
         return None
 
 
+def to_int(v, lo, hi):
+    """Whole number in [lo, hi] (int, integral float or digit string; bool/None/other rejected), else None."""
+    if isinstance(v, str) and v.isdigit():
+        v = int(v)
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return None
+    if v != v or v != int(v) or not lo <= v <= hi:
+        return None
+    return int(v)
+
+
+def hole_key(k):
+    """Hole number as the string "1".."18" (accepts "02"), else None."""
+    k = str(k)
+    if not k.isdigit() or not 1 <= int(k) <= 18:
+        return None
+    return str(int(k))
+
+
 def export_player(p):
     out = pick(p, ("name", "team"))
     out["name"] = str(out.get("name", ""))
-    out["team"] = str(out.get("team", "") or "")
+    out["team"] = out.get("team") if out.get("team") in TEAMS else ""
     out["captain"] = bool(p.get("captain"))
     out["index"] = to_float(p.get("index"))
     return out
@@ -81,18 +103,35 @@ def export_pairings(p):
 
 
 def export_score(d):
-    return {"holes": d.get("holes") if isinstance(d.get("holes"), dict) else {},
-            "tp": d.get("tp") if isinstance(d.get("tp"), dict) else {}}
+    holes, tp = {}, {}
+    for k, v in (d.get("holes") if isinstance(d.get("holes"), dict) else {}).items():
+        h, n = hole_key(k), to_int(v, 1, 20)
+        if h and n is not None:
+            holes[h] = n
+    for k, v in (d.get("tp") if isinstance(d.get("tp"), dict) else {}).items():
+        h = hole_key(k)
+        if h and v:
+            tp[h] = 1
+    return {"holes": holes, "tp": tp}
+
+
+def export_mulligan(m):
+    out = {"used": bool(m.get("used"))}
+    if m.get("round") in ROUND_IDS:
+        out["round"] = m["round"]
+    hole = to_int(m.get("hole"), 1, 18)
+    if hole is not None:
+        out["hole"] = hole
+    return out
 
 
 def export_side(side):
+    # Only mulligans are published (the page shows Used/Available); comps carry free text and are never rendered.
     out = {}
     mull = side.get("mulligans")
     if isinstance(mull, dict):
-        out["mulligans"] = {pid: pick(m, ("used", "round", "hole")) for pid, m in mull.items() if isinstance(m, dict)}
-    comps = side.get("comps")
-    if isinstance(comps, dict):
-        out["comps"] = {k: pick(c, ("pid", "note")) for k, c in comps.items() if isinstance(c, dict)}
+        out["mulligans"] = {pid: export_mulligan(m) for pid, m in mull.items()
+                            if isinstance(m, dict) and re.fullmatch(r"[A-Za-z0-9_.-]{1,64}", pid)}
     return out
 
 
