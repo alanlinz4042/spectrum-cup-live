@@ -165,7 +165,7 @@ function renderLive(){
       let big='',cls='',thru='';
       if(ov.complete){big=ov.w==='T'?'HALVED':(ov.w==='PS'?'PS WIN':'IL WIN');cls=ov.w==='T'?'':ov.w.toLowerCase();
         thru=ov.w==='T'?'Final':(r.format==='stroke'?`by ${Math.abs(ov.diff)} net · Final`:(ov.closed?`${Math.abs(ov.diff)}&${ov.total-ov.played} · Final`:`${Math.abs(ov.diff)} up · Final`))}
-      else if(!played){big='—';thru='Not started'}
+      else if(!played){big='—';thru=m.tee?`Tee ${esc(m.tee)}`:'Not started'}
       else if(r.format==='stroke'){const d=ov.diff;big=d===0?'EVEN':`${d>0?'PS':'IL'} +${Math.abs(d)}`;cls=d>0?'ps':d<0?'il':'';thru=`net · thru ${played}`}
       else{const d=ov.diff;big=d===0?'A/S':`${d>0?'PS':'IL'} ${Math.abs(d)} UP`;cls=d>0?'ps':d<0?'il':'';thru=`thru ${played}`}
       const lead=ov.complete?(ov.w==='PS'?'lead-ps':ov.w==='IL'?'lead-il':''):(ov.diff>0?'lead-ps':ov.diff<0?'lead-il':'');
@@ -192,10 +192,10 @@ function renderCup(){
   b+=`<div class="lbl tag-il">${teamMark('IL')}Iron Legends</div>${rows.IL}<div class="tot num tag-il">${fmtPts(tot.IL)}</div>`;
   $('#board').innerHTML=b;
   // rounds
-  let h='';ROUNDS.forEach(r=>{const p=roundPts(r.id);h+=`<div class="card cup-round"><div class="row" style="justify-content:space-between"><h2>${courseLogo(r.id)?`<img class="clogo" src="${courseLogo(r.id)}" alt="">`:''}Round ${r.n} · ${esc(r.course)}</h2><span class="pill ps">PS ${fmtPts(p.PS)}</span><span class="pill il">IL ${fmtPts(p.IL)}</span></div><div class="eyebrow" style="margin-bottom:8px">${esc(r.fmt)} · ${r.day}</div><div class="matchgrid">`;
+  let h='';ROUNDS.forEach(r=>{const p=roundPts(r.id);h+=`<div class="card cup-round"><div class="rhead"><h2>${courseLogo(r.id)?`<img class="clogo" src="${courseLogo(r.id)}" alt="">`:''}Round ${r.n} · ${esc(r.course)}</h2><div class="rscore"><span class="pill ps ${p.PS>p.IL?'lead':''}">PS ${fmtPts(p.PS)}</span><span class="pill il ${p.IL>p.PS?'lead':''}">IL ${fmtPts(p.IL)}</span></div></div><div class="eyebrow" style="margin-bottom:8px">${esc(r.fmt)} · ${r.day}</div><div class="matchgrid">`;
     for(let i=0;i<r.matches;i++){const c=computeMatch(r.id,i);const m=(pairings[r.id]||[])[i]||{};
       if(!c.set){h+=`<div class="mcard"><div class="eyebrow">Match ${i+1}</div><div class="empty" style="margin-top:6px">Pairing not set</div></div>`;continue}
-      h+=`<div class="mcard"><div class="eyebrow">Match ${i+1}</div><div class="who"><div class="ps">${(m.PS||[]).map(p=>esc(pname(p,true))).join('<br>')}</div><div class="vs">VS</div><div class="il">${(m.IL||[]).map(p=>esc(pname(p,true))).join('<br>')}</div></div><div class="segs">`;
+      h+=`<div class="mcard"><div class="eyebrow">Match ${i+1}${m.tee?` · Tee ${esc(m.tee)}`:''}</div><div class="who"><div class="ps">${(m.PS||[]).map(p=>esc(pname(p,true))).join('<br>')}</div><div class="vs">VS</div><div class="il">${(m.IL||[]).map(p=>esc(pname(p,true))).join('<br>')}</div></div><div class="segs">`;
       for(const s of Object.values(c.segs)){const cls=s.w==='PS'?'w-ps':s.w==='IL'?'w-il':'';const v=s.complete?(s.w==='T'?'½ – ½':s.w==='PS'?`PS +${s.pts}`:`IL +${s.pts}`):(s.played?`${s.played}/${s.total}`:'—');h+=`<div class="seg ${cls}"><div class="k">${esc(s.label)}</div><div class="v">${v}</div></div>`}
       const ov=c.segs.overall;h+=`</div><div class="stand">${esc(ov.status||'Not started')}</div></div>`}
     h+='</div>'+highlightsHtml(r.id)+'</div>'});

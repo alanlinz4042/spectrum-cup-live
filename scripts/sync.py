@@ -92,13 +92,25 @@ def export_settings(s):
             "allow": pick(allow, ALLOW_KEYS)}
 
 
+TEE_RE = re.compile(r"^\d{1,2}:\d{2}\s?(AM|PM|am|pm)?$")
+
+
+def export_match(m):
+    out = {"PS": [str(x) for x in (m.get("PS") or [])], "IL": [str(x) for x in (m.get("IL") or [])]}
+    tee = m.get("tee")
+    if isinstance(tee, str):
+        tee = tee.strip()
+        if len(tee) <= 10 and TEE_RE.match(tee):
+            out["tee"] = tee
+    return out
+
+
 def export_pairings(p):
     out = {}
     for rid, matches in (p or {}).items():
         if not isinstance(matches, list):
             continue
-        out[rid] = [{"PS": [str(x) for x in (m.get("PS") or [])], "IL": [str(x) for x in (m.get("IL") or [])]}
-                    for m in matches if isinstance(m, dict)]
+        out[rid] = [export_match(m) for m in matches if isinstance(m, dict)]
     return out
 
 

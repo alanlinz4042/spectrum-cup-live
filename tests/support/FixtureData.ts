@@ -14,12 +14,12 @@ export interface PrivatePlayerFields {
 export class FixtureData {
   private readonly raw: any;
 
-  /** Expected tally for the fixture: r1 M1 + M2 are clean PS sweeps (3 pts each). */
-  readonly expected: { ps: string; il: string; players: number };
+  /** Expected tally for the fixture: r1 M1 + M2 are clean PS sweeps (3 pts each); r1 M3 is unstarted with a tee time. */
+  readonly expected: { ps: string; il: string; players: number; teeMatch: number; tee: string };
 
   constructor(fixturePath = FIXTURE_PATH) {
     this.raw = JSON.parse(fs.readFileSync(fixturePath, 'utf8'));
-    this.expected = { ps: '6', il: '0', players: Object.keys(this.raw.players).length };
+    this.expected = { ps: '6', il: '0', players: Object.keys(this.raw.players).length, teeMatch: 2, tee: this.raw.pairings.r1[2].tee };
   }
 
   /** A fresh deep copy of the fixture. */
@@ -49,6 +49,13 @@ export class FixtureData {
   withTamperedTeam(pid: string, team: string): any {
     const d = this.base();
     d.players[pid] = { ...d.players[pid], team };
+    return d;
+  }
+
+  /** Fixture with a script payload in a match's tee time (rendered on Live, the Cup card and the scorecard eyebrow). */
+  withTamperedTee(rid: string, match: number, tee: string): any {
+    const d = this.base();
+    d.pairings[rid][match] = { ...d.pairings[rid][match], tee };
     return d;
   }
 
