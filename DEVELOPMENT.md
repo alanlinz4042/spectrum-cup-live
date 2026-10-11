@@ -63,10 +63,13 @@ Pushes that only touch `docs/data.json` (the sync commits) skip CI.
 
 ## Keeping the data fresh
 
-`scripts/SYNC_PROMPT.md` is the prompt for a scheduled Claude session. Each run dumps the artifact's
-`players`, `scores` and `side` collections plus the `config/settings`, `config/pairings` and `config/sponsor`
-documents to `/home/claude/dump` (outside the clone), runs `scripts/sync.py --dump /home/claude/dump --listed <collections it read>`,
-and commits `docs/data.json` only when something changed. Each run also writes a status record to the board's
+`scripts/SYNC_PROMPT.md` is the prompt for a scheduled Claude session. Each run dumps only what changes
+during play — the `scores` and `side` collections and the `config/pairings` document — to `/home/claude/dump`
+(outside the clone), runs `scripts/sync.py --dump /home/claude/dump --listed scores,side --carry players,settings,sponsor`,
+and commits `docs/data.json` only when something changed. The roster, course settings and sponsor are carried
+over from the previous published file (`--carry`, not marked stale); they change only when the organizer runs a
+full sync from chat (all six reads, no `--carry`). Reading fewer collections keeps the scheduled session's
+permission classifier out of the way: in production it denied `config` list calls and `players` reads. Each run also writes a status record to the board's
 `synclog/last` document so the organizer can see what happened. `tests/test_sync.py` is the contract: nothing from the
 list `phone ghin club email mulligan snake entry __seen gfm pot` can reach the public file.
 
@@ -89,7 +92,10 @@ it is non-empty). A change in staleness alone is published; `updatedAt` alone is
 
 An existing but empty `scores/` or `side/` directory is genuinely empty (`{}`). `--listed` names the
 collections the caller confirmed it read successfully, because `ArtifactData list` writes no directory at all
-for a collection with zero documents; without it, an absent directory is treated as a denied read.
+for a collection with zero documents; without it, an absent directory is treated as a denied read. `--carry`
+names sections the caller never tried to read: they come from `previous` without being marked stale (a
+carried section that is nevertheless present in the dump is exported fresh; a carried `players`/`settings`
+with no previous file still exits 2).
 
 ## Refreshing the page after the artifact changes
 

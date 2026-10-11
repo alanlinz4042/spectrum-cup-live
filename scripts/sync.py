@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Export an artifact-DB dump to docs/data.json using an explicit allow-list.
 
-Usage: python3 scripts/sync.py --dump /home/claude/dump --out docs/data.json [--listed players,scores,side,config]
+Usage: python3 scripts/sync.py --dump /home/claude/dump --out docs/data.json [--listed scores,side] [--carry players,settings,sponsor]
 Prints CHANGED or UNCHANGED (first token), followed by " stale=<sections>" when any section was carried over
-from the previous output. Exit 2 when neither the dump nor the previous output has settings or players.
+from the previous output without being asked for. Exit 2 when neither the dump nor the previous output has settings or players.
 Never prints document contents.
 
 Input layout (what `ArtifactData list/get ... out_dir=<dump>` writes): <dump>/<collection>/<doc_id>.json,
@@ -13,6 +13,9 @@ Fallback: a collection whose read was denied leaves no directory (or config doc)
 is reused from the existing --out file and named in "stale". `--listed` names the collections the caller
 confirmed it read successfully: for those, an absent scores/side directory or config doc is genuinely empty.
 `players` is never trusted empty. Only an existing scores/side directory (even empty) counts as read.
+`--carry` names sections the caller deliberately did not read (the slimmed scheduled runs skip players,
+settings and sponsor): they are reused from the previous output silently, not marked stale. A carried
+section that is present in the dump is still exported fresh.
 """
 import argparse
 import datetime
@@ -170,14 +173,17 @@ def players_present(dump):
     return bool(glob.glob(os.path.join(dump, "players", "*.json")))
 
 
-def build(dump, previous=None, listed=()):
-    """Export the dump; sections missing from it come from `previous` (the last output) and are named in stale."""
+def build(dump, previous=None, listed=(), carry=()):
+    """Export the dump; sections missing from it come from `previous` (the last output) and are named in stale
+    unless the caller said it was carrying them on purpose."""
     previous = previous if isinstance(previous, dict) else {}
     stale = []
 
     def section(name, collection, present, fresh, default, required=False, trust_listed=True):
         if present:
             return fresh()
+        if name in carry and previous.get(name) is not None:
+            return previous[name]
         if (not (trust_listed and collection in listed)) and previous.get(name) is not None:
             stale.append(name)
             return previous[name]
@@ -224,9 +230,9 @@ def load_previous(out_path):
     return previous if isinstance(previous, dict) else None
 
 
-def run(dump, out_path, listed=()):
+def run(dump, out_path, listed=(), carry=()):
     previous = load_previous(out_path)
-    data = build(dump, previous, tuple(listed))
+    data = build(dump, previous, tuple(listed), tuple(carry))
     suffix = " stale=" + ",".join(data["stale"]) if data["stale"] else ""
     if previous is not None:
         prev = dict(previous)
@@ -247,9 +253,12 @@ def main(argv=None):
     ap.add_argument("--out", default="docs/data.json")
     ap.add_argument("--listed", default="",
                     help="comma-separated collections read successfully (absent scores/side dir or config doc = empty)")
+    ap.add_argument("--carry", default="",
+                    help="comma-separated sections deliberately not read; reused from the previous output, not stale")
     args = ap.parse_args(argv)
     listed = tuple(c.strip() for c in args.listed.split(",") if c.strip())
-    print(run(args.dump, args.out, listed))
+    carry = tuple(c.strip() for c in args.carry.split(",") if c.strip())
+    print(run(args.dump, args.out, listed, carry))
     return 0
 
 
