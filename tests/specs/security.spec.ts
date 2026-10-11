@@ -36,6 +36,9 @@ test.describe('security', { tag: '@security' }, () => {
     expect(await board.pwned()).toBeUndefined();
     await expect(board.sponsorMark).toBeVisible();
     await expect(board.sponsorLink).not.toHaveAttribute('href', /.*/);
+    await board.open('Cup');
+    await expect(board.compChips).toHaveCount(1); // the off-origin ctp logo is dropped entirely
+    await expect(board.compChips.first()).not.toHaveAttribute('href', /.*/); // javascript: link stripped
     expect(await board.cssVariable('--logo-ps')).toBe('none');
     await expect(board.cupRoundLogos).toHaveCount(1); // only the one well-formed logos/r4.png survives
     await expect(board.cupRoundLogos.first()).toHaveAttribute('src', /logos\/r4\.png$/);

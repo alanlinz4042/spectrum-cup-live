@@ -113,6 +113,11 @@ function applyLogos(){const L=logos||{};const r=document.documentElement;const c
   r.style.setProperty('--logo-ps',L.PS?`url(${esc(L.PS)})`:'none');r.style.setProperty('--logo-il',L.IL?`url(${esc(L.IL)})`:'none');
   r.classList.toggle('has-marks',!!(L.PS||L.IL))}
 function courseLogo(rid){const L=logos||{};return L[rid]?`${esc(L[rid])}`:''}
+// On-course competition sponsors: config/comps {longestPutt|longestDrive|ctp:{name,url,imageId}} → linked logo chips on the round that hosts the prize.
+const COMPS=[['longestPutt','Longest Putt','r1',18],['longestDrive','Longest Drive','r6',1],['ctp','Closest to the Pin','r6',19]];
+let csponsors=null;
+function compChip(k,withLabel){const c=(csponsors||{})[k];if(!c||!c.imageId)return '';const d=COMPS.find(x=>x[0]===k);const src=`${esc(c.imageId)}`;const lbl=withLabel&&d?`<span>${esc(d[1])} · H${d[3]}</span>`:'';const href=c.url?` href="${esc(c.url)}" target="_blank" rel="noopener"`:'';return `<a class="cspon"${href} title="${esc((d?d[1]+' · ':'')+(c.name||''))}"><img src="${src}" alt="${esc(c.name||'')}">${lbl}</a>`}
+function roundComps(rid,withLabel){const h=COMPS.filter(x=>x[2]===rid).map(x=>compChip(x[0],withLabel)).join('');return h?`<div class="cspons">${h}</div>`:''}
 function teamMark(t,h){const L=logos||{};return L[t]?`<img src="${esc(L[t])}" alt="" style="height:${h||18}px;width:auto;vertical-align:-4px;margin-right:4px">`:''}
 setInterval(tickStrip,30000);
 
@@ -158,7 +163,7 @@ function renderLive(){
   $('#dayChips').innerHTML=DAYS.map(d=>`<button class="chip ${d.k===liveDay?'on':''}" data-day="${d.k}">${d.label}</button>`).join('');
   const day=DAYS.find(d=>d.k===liveDay);let h='';
   day.rounds.forEach(rid=>{const r=RBY[rid];const p=roundPts(rid);
-    h+=`<div class="lv-round" data-course="${rid}"><div class="lv-head"><div class="lhs">${courseLogo(rid)?`<span class="cmark" style="--mark:url(${courseLogo(rid)})" aria-hidden="true"></span>`:''}<div class="t">R${r.n} · ${esc(r.course.replace(' Par 3',''))}<small>${esc(r.fmt)}</small></div></div><div class="sc num"><span class="p">${fmtPts(p.PS)}</span><span class="d">–</span><span class="i">${fmtPts(p.IL)}</span></div></div>`;
+    h+=`<div class="lv-round" data-course="${rid}"><div class="lv-head"><div class="lhs">${courseLogo(rid)?`<span class="cmark" style="--mark:url(${courseLogo(rid)})" aria-hidden="true"></span>`:''}<div class="t">R${r.n} · ${esc(r.course.replace(' Par 3',''))}<small>${esc(r.fmt)}</small></div></div>${roundComps(rid,true)}<div class="sc num"><span class="p">${fmtPts(p.PS)}</span><span class="d">–</span><span class="i">${fmtPts(p.IL)}</span></div></div>`;
     for(let i=0;i<r.matches;i++){const c=computeMatch(rid,i);const m=(pairings[rid]||[])[i]||{};
       if(!c.set){h+=`<div class="lv-m"><div class="n" style="color:var(--muted)">Match ${i+1}</div><div class="st"><div class="thru">Pairing not set</div></div><div></div></div>`;continue}
       const ov=c.segs.overall;const played=ov.played;
@@ -192,7 +197,7 @@ function renderCup(){
   b+=`<div class="lbl tag-il">${teamMark('IL')}Iron Legends</div>${rows.IL}<div class="tot num tag-il">${fmtPts(tot.IL)}</div>`;
   $('#board').innerHTML=b;
   // rounds
-  let h='';ROUNDS.forEach(r=>{const p=roundPts(r.id);h+=`<div class="card cup-round"><div class="rhead"><h2>${courseLogo(r.id)?`<img class="clogo" src="${courseLogo(r.id)}" alt="">`:''}Round ${r.n} · ${esc(r.course)}</h2><div class="rscore"><span class="pill ps ${p.PS>p.IL?'lead':''}">PS ${fmtPts(p.PS)}</span><span class="pill il ${p.IL>p.PS?'lead':''}">IL ${fmtPts(p.IL)}</span></div></div><div class="eyebrow" style="margin-bottom:8px">${esc(r.fmt)} · ${r.day}</div><div class="matchgrid">`;
+  let h='';ROUNDS.forEach(r=>{const p=roundPts(r.id);h+=`<div class="card cup-round"><div class="rhead"><h2>${courseLogo(r.id)?`<img class="clogo" src="${courseLogo(r.id)}" alt="">`:''}Round ${r.n} · ${esc(r.course)}</h2>${roundComps(r.id,true)}<div class="rscore"><span class="pill ps ${p.PS>p.IL?'lead':''}">PS ${fmtPts(p.PS)}</span><span class="pill il ${p.IL>p.PS?'lead':''}">IL ${fmtPts(p.IL)}</span></div></div><div class="eyebrow" style="margin-bottom:8px">${esc(r.fmt)} · ${r.day}</div><div class="matchgrid">`;
     for(let i=0;i<r.matches;i++){const c=computeMatch(r.id,i);const m=(pairings[r.id]||[])[i]||{};
       if(!c.set){h+=`<div class="mcard"><div class="eyebrow">Match ${i+1}</div><div class="empty" style="margin-top:6px">Pairing not set</div></div>`;continue}
       h+=`<div class="mcard"><div class="eyebrow">Match ${i+1}${m.tee?` · Tee ${esc(m.tee)}`:''}</div><div class="who"><div class="ps">${(m.PS||[]).map(p=>esc(pname(p,true))).join('<br>')}</div><div class="vs">VS</div><div class="il">${(m.IL||[]).map(p=>esc(pname(p,true))).join('<br>')}</div></div><div class="segs">`;
@@ -256,6 +261,7 @@ const safePath=v=>typeof v==='string'&&SAFE_IMG.test(v)?v:'';
 const safeUrl=v=>typeof v==='string'&&/^https:\/\//.test(v)?v:'';
 const safeLogos=o=>{const out={};if(o&&typeof o==='object')Object.keys(o).forEach(k=>{const v=safePath(o[k]);if(v)out[k]=v});return out};
 const safeSponsor=o=>o&&typeof o==='object'?{name:String(o.name||''),url:safeUrl(o.url),imageId:safePath(o.imageId)}:null;
+const safeComps=o=>{const out={};if(o&&typeof o==='object')Object.keys(o).forEach(k=>{const c=safeSponsor(o[k]);if(c&&c.imageId)out[k]=c});return out};
 const POLL_MS=Math.max(1000,+(new URLSearchParams(location.search).get('poll'))||60000);
 let lastText='';
 async function pull(){
@@ -265,7 +271,7 @@ async function pull(){
     const text=await r.text();if(text===lastText)return;lastText=text;
     const d=JSON.parse(text);
     players=d.players||{};settings=d.settings||null;pairings=d.pairings||{};scores=d.scores||{};side=d.side||{};
-    sponsor=safeSponsor(d.sponsor);logos=safeLogos(d.logos);
+    sponsor=safeSponsor(d.sponsor);logos=safeLogos(d.logos);csponsors=safeComps(d.compSponsors);
     applyLogos();tickStrip();render();setStatus('');
     const n=$('#syncNote');if(n&&d.updatedAt){try{n.textContent=' · scores as of '+new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'}).format(new Date(d.updatedAt))+' CT'+(Array.isArray(d.stale)&&d.stale.length?' (partial refresh)':'')}catch(e){}}
   }catch(e){if(!lastText)setStatus('Scores are not available right now. Refresh in a minute.')}

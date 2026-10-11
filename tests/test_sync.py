@@ -23,6 +23,9 @@ SPONSOR = {"name": "Sponsor Co", "url": "http://insecure.example", "imageId": "0
 SCORE = {"holes": {"1": 4, "2": 5}, "tp": {"2": 1}, "__seen": True}
 MULL = {"p01": {"used": True, "round": "r1", "hole": 7, "gfm": True, "pot": False}}
 COMPS = {"longestPutt": {"pid": "p01", "note": "38 ft"}}
+COMP_SPONSORS = {"longestPutt": {"name": "Putt Co", "url": "https://putt.example/", "imageId": "0123456789abcdef0123456789abcdef"},
+                 "ctp": {"name": "Pin Co", "url": "http://insecure.example", "imageId": "fedcba9876543210fedcba9876543210"},
+                 "bogus": {"name": "Nope", "url": "https://x.example/", "imageId": "00000000000000000000000000000000"}}
 
 
 def write(path, obj):
@@ -39,6 +42,7 @@ def make_dump(root, wrapped=False):
     write(os.path.join(root, "config", "settings.json"), doc("settings", SETTINGS))
     write(os.path.join(root, "config", "pairings.json"), doc("pairings", PAIRINGS))
     write(os.path.join(root, "config", "sponsor.json"), doc("sponsor", SPONSOR))
+    write(os.path.join(root, "config", "comps.json"), doc("comps", COMP_SPONSORS))
     write(os.path.join(root, "scores", "r1_p01.json"), doc("r1_p01", SCORE))
     write(os.path.join(root, "side", "mulligans.json"), doc("mulligans", MULL))
     write(os.path.join(root, "side", "comps.json"), doc("comps", COMPS))
@@ -68,6 +72,15 @@ class SyncTests(unittest.TestCase):
             self.assertNotIn('"%s"' % k, text, k)
         self.assertNotIn("555-0100", text)
         self.assertNotIn("Secret CC", text)
+
+    def test_comp_sponsors_are_exported_with_fixed_logo_paths(self):
+        self.run_sync()
+        c = json.loads(self.read_out())["compSponsors"]
+        self.assertEqual(set(c), {"longestPutt", "ctp"})  # unknown keys dropped
+        self.assertEqual(c["longestPutt"], {"name": "Putt Co", "url": "https://putt.example/",
+                                            "imageId": "logos/comp-longest-putt.png"})
+        self.assertEqual(c["ctp"], {"name": "Pin Co", "imageId": "logos/comp-ctp.png"})  # http link dropped
+        self.assertNotIn("0123456789abcdef", self.read_out())
 
     def test_shapes_and_coercions(self):
         self.run_sync()
@@ -219,7 +232,7 @@ class FallbackTests(unittest.TestCase):
 
     def test_missing_whole_config_falls_back_for_all_three_docs(self):
         self.drop("config")
-        self.assertEqual(sync.run(self.dump, self.out), "CHANGED stale=settings,pairings,sponsor")
+        self.assertEqual(sync.run(self.dump, self.out), "CHANGED stale=settings,pairings,sponsor,compSponsors")
         d = self.read_out()
         self.assertEqual(d["pairings"], PAIRINGS)
         self.assertEqual(d["sponsor"]["name"], "Sponsor Co")

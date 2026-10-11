@@ -53,6 +53,8 @@ h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.05}
 .cmark{display:block;flex:0 0 auto;height:34px;width:64px;background:currentColor;color:var(--card-band-fg);opacity:.9;-webkit-mask:var(--mark) center/contain no-repeat;mask:var(--mark) center/contain no-repeat}
 .lv-head .cmark{margin-right:2px}
 .lv-head .lhs{display:flex;align-items:center;gap:10px;min-width:0}
+.cspons{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.lv-head .cspons{margin-left:auto}
+.cspon{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:3px 7px;text-decoration:none;color:#0b1f40;line-height:1;box-shadow:0 1px 2px rgba(0,0,0,.18)}.cspon img{height:26px;width:auto;max-width:76px;display:block}.cspon span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
 .scard .clogo{height:46px;width:auto;max-width:150px;flex:0 0 auto}
 .cup-round .clogo{height:30px;width:auto;max-width:110px;vertical-align:middle;margin-right:8px}
 .cup-round .rhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
@@ -327,7 +329,7 @@ input[type=number]{width:64px;text-align:center}
 .lv-m .pts i{display:block;width:16px;height:5px;border-radius:3px;background:var(--line)}
 .lv-m .pts i.ps{background:var(--ps)}.lv-m .pts i.il{background:var(--il)}.lv-m .pts i.t{background:linear-gradient(90deg,var(--ps) 50%,var(--il) 50%)}
 .lv-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:4px 2px 0}
-@media (max-width:480px){.t-long{display:none}.t-short{display:inline}.hdr h1{font-size:20px}.crest{height:40px}.brand{gap:8px}.spon-top img{height:46px;max-width:140px}.hdr-in{padding:8px 16px 6px}.tally .side{gap:2px}.tally .top{gap:8px}.tmark{height:34px;width:34px}.tmark.ps{width:22px}.tally .team{font-size:12px;letter-spacing:.06em}.tally{gap:6px}.tally{margin-top:4px}.tally .big{font-size:34px}.tally .team{font-size:13px}.tally .team small{font-size:10px;margin-top:2px}.bar{margin-top:6px}.tabs button{padding:8px 7px;font-size:14px;letter-spacing:.02em}.hdr-top{flex-wrap:nowrap}.me select{max-width:150px}.board{font-size:12px}.board .tot{font-size:16px}.cell input{width:46px}}
+@media (max-width:480px){.cspon span{display:none}.cspon img{height:22px}.cspon{padding:3px 5px}.t-long{display:none}.t-short{display:inline}.hdr h1{font-size:20px}.crest{height:40px}.brand{gap:8px}.spon-top img{height:46px;max-width:140px}.hdr-in{padding:8px 16px 6px}.tally .side{gap:2px}.tally .top{gap:8px}.tmark{height:34px;width:34px}.tmark.ps{width:22px}.tally .team{font-size:12px;letter-spacing:.06em}.tally{gap:6px}.tally{margin-top:4px}.tally .big{font-size:34px}.tally .team{font-size:13px}.tally .team small{font-size:10px;margin-top:2px}.bar{margin-top:6px}.tabs button{padding:8px 7px;font-size:14px;letter-spacing:.02em}.hdr-top{flex-wrap:nowrap}.me select{max-width:150px}.board{font-size:12px}.board .tot{font-size:16px}.cell input{width:46px}}
 @media (max-width:420px){.tabs button{padding:9px 6px;font-size:13.5px;letter-spacing:.01em}}
 @media (max-width:360px){.hdr h1{font-size:18px}.me{font-size:12px}.me select{max-width:128px}.tally{gap:6px}.tally .top{gap:6px}.tally .big{font-size:30px}.tally .team{font-size:11px}.tmark{height:28px;width:28px}.tmark.ps{width:18px}.crest{height:34px}.spon-top img{height:38px;max-width:110px}.tally .mid{font-size:10px;letter-spacing:.06em}.tabs button{padding:9px 7px;font-size:13px}}
 @media (prefers-reduced-motion:no-preference){.bar i{transition:width .5s ease}}
@@ -541,6 +543,11 @@ function applyLogos(){const L=logos||{};const r=document.documentElement;const c
   r.style.setProperty('--logo-ps',L.PS?`url(/_blob/${esc(L.PS)})`:'none');r.style.setProperty('--logo-il',L.IL?`url(/_blob/${esc(L.IL)})`:'none');
   r.classList.toggle('has-marks',!!(L.PS||L.IL))}
 function courseLogo(rid){const L=logos||{};return L[rid]?`/_blob/${esc(L[rid])}`:''}
+// On-course competition sponsors: config/comps {longestPutt|longestDrive|ctp:{name,url,imageId}} → linked logo chips on the round that hosts the prize.
+const COMPS=[['longestPutt','Longest Putt','r1',18],['longestDrive','Longest Drive','r6',1],['ctp','Closest to the Pin','r6',19]];
+let csponsors=null;
+function compChip(k,withLabel){const c=(csponsors||{})[k];if(!c||!c.imageId)return '';const d=COMPS.find(x=>x[0]===k);const src=`/_blob/${esc(c.imageId)}`;const lbl=withLabel&&d?`<span>${esc(d[1])} · H${d[3]}</span>`:'';const href=c.url?` href="${esc(c.url)}" target="_blank" rel="noopener"`:'';return `<a class="cspon"${href} title="${esc((d?d[1]+' · ':'')+(c.name||''))}"><img src="${src}" alt="${esc(c.name||'')}">${lbl}</a>`}
+function roundComps(rid,withLabel){const h=COMPS.filter(x=>x[2]===rid).map(x=>compChip(x[0],withLabel)).join('');return h?`<div class="cspons">${h}</div>`:''}
 function teamMark(t,h){const L=logos||{};return L[t]?`<img src="/_blob/${esc(L[t])}" alt="" style="height:${h||18}px;width:auto;vertical-align:-4px;margin-right:4px">`:''}
 setInterval(tickStrip,30000);
 
@@ -622,7 +629,7 @@ function renderLive(){
   $('#dayChips').innerHTML=DAYS.map(d=>`<button class="chip ${d.k===liveDay?'on':''}" data-day="${d.k}">${d.label}</button>`).join('');
   const day=DAYS.find(d=>d.k===liveDay);let h='';
   day.rounds.forEach(rid=>{const r=RBY[rid];const p=roundPts(rid);
-    h+=`<div class="lv-round" data-course="${rid}"><div class="lv-head"><div class="lhs">${courseLogo(rid)?`<span class="cmark" style="--mark:url(${courseLogo(rid)})" aria-hidden="true"></span>`:''}<div class="t">R${r.n} · ${esc(r.course.replace(' Par 3',''))}<small>${esc(r.fmt)}</small></div></div><div class="sc num"><span class="p">${fmtPts(p.PS)}</span><span class="d">–</span><span class="i">${fmtPts(p.IL)}</span></div></div>`;
+    h+=`<div class="lv-round" data-course="${rid}"><div class="lv-head"><div class="lhs">${courseLogo(rid)?`<span class="cmark" style="--mark:url(${courseLogo(rid)})" aria-hidden="true"></span>`:''}<div class="t">R${r.n} · ${esc(r.course.replace(' Par 3',''))}<small>${esc(r.fmt)}</small></div></div>${roundComps(rid,true)}<div class="sc num"><span class="p">${fmtPts(p.PS)}</span><span class="d">–</span><span class="i">${fmtPts(p.IL)}</span></div></div>`;
     for(let i=0;i<r.matches;i++){const c=computeMatch(rid,i);const m=(pairings[rid]||[])[i]||{};
       if(!c.set){h+=`<div class="lv-m"><div class="n" style="color:var(--muted)">Match ${i+1}</div><div class="st"><div class="thru">Pairing not set</div></div><div></div></div>`;continue}
       const ov=c.segs.overall;const played=ov.played;
@@ -656,7 +663,7 @@ function renderCup(){
   b+=`<div class="lbl tag-il">${teamMark('IL')}Iron Legends</div>${rows.IL}<div class="tot num tag-il">${fmtPts(tot.IL)}</div>`;
   $('#board').innerHTML=b;
   // rounds
-  let h='';ROUNDS.forEach(r=>{const p=roundPts(r.id);h+=`<div class="card cup-round"><div class="rhead"><h2>${courseLogo(r.id)?`<img class="clogo" src="${courseLogo(r.id)}" alt="">`:''}Round ${r.n} · ${esc(r.course)}</h2><div class="rscore"><span class="pill ps ${p.PS>p.IL?'lead':''}">PS ${fmtPts(p.PS)}</span><span class="pill il ${p.IL>p.PS?'lead':''}">IL ${fmtPts(p.IL)}</span></div></div><div class="eyebrow" style="margin-bottom:8px">${esc(r.fmt)} · ${r.day}</div><div class="matchgrid">`;
+  let h='';ROUNDS.forEach(r=>{const p=roundPts(r.id);h+=`<div class="card cup-round"><div class="rhead"><h2>${courseLogo(r.id)?`<img class="clogo" src="${courseLogo(r.id)}" alt="">`:''}Round ${r.n} · ${esc(r.course)}</h2>${roundComps(r.id,true)}<div class="rscore"><span class="pill ps ${p.PS>p.IL?'lead':''}">PS ${fmtPts(p.PS)}</span><span class="pill il ${p.IL>p.PS?'lead':''}">IL ${fmtPts(p.IL)}</span></div></div><div class="eyebrow" style="margin-bottom:8px">${esc(r.fmt)} · ${r.day}</div><div class="matchgrid">`;
     for(let i=0;i<r.matches;i++){const c=computeMatch(r.id,i);const m=(pairings[r.id]||[])[i]||{};
       if(!c.set){h+=`<div class="mcard"><div class="eyebrow">Match ${i+1}</div><div class="empty" style="margin-top:6px">Pairing not set</div></div>`;continue}
       h+=`<div class="mcard"><div class="eyebrow">Match ${i+1}${m.tee?` · Tee ${esc(m.tee)}`:''}</div><div class="who"><div class="ps">${(m.PS||[]).map(p=>esc(pname(p,true))).join('<br>')}</div><div class="vs">VS</div><div class="il">${(m.IL||[]).map(p=>esc(pname(p,true))).join('<br>')}</div></div><div class="segs">`;
@@ -697,7 +704,7 @@ function renderScore(){
   const segEnds=new Set(r.segs.filter(s=>s[0]!=='overall').map(s=>s[3]));
   const toggle=myCol?`<button class="btn ghost sm" id="sheetToggle">${compact?'Full sheet':'My card'}</button>`:'';
   const cc0=course(curRound)||{};const teeLbl=cc0.tee?` · ${esc(String(cc0.tee).split(' (')[0])}`:'';
-  let h=`<div class="card scard" data-course="${curRound}">${true?`<div class="band wm"><span class="name ${r.course.replace(' Par 3','').length>12?'long':''}">${esc(r.course.replace(' Par 3',''))}</span><span class="rule"></span><span class="sub">${r.holes} holes · par ${(cc0.par||[]).reduce((a,b)=>a+(+b||0),0)||r.holes*3}</span></div><div class="inner">`:''}<div class="row" style="justify-content:space-between"><h2>Round ${r.n} · Match ${curMatch+1}${myCol?' <span style="color:var(--muted);font-size:14px">★ yours</span>':''}</h2><div class="row" style="gap:10px">${courseLogo(curRound)?`<img class="clogo" src="${courseLogo(curRound)}" alt="${esc(r.course)}">`:''}${badge}${toggle}</div></div><div class="eyebrow">${esc(r.course)}${teeLbl} · ${esc(r.fmt)}${(pr[curMatch]||{}).tee?` · Tee ${esc(pr[curMatch].tee)}`:''}</div>`;
+  let h=`<div class="card scard" data-course="${curRound}">${true?`<div class="band wm"><span class="name ${r.course.replace(' Par 3','').length>12?'long':''}">${esc(r.course.replace(' Par 3',''))}</span><span class="rule"></span><span class="sub">${r.holes} holes · par ${(cc0.par||[]).reduce((a,b)=>a+(+b||0),0)||r.holes*3}</span></div><div class="inner">`:''}<div class="row" style="justify-content:space-between"><h2>Round ${r.n} · Match ${curMatch+1}${myCol?' <span style="color:var(--muted);font-size:14px">★ yours</span>':''}</h2><div class="row" style="gap:10px">${roundComps(curRound,false)}${courseLogo(curRound)?`<img class="clogo" src="${courseLogo(curRound)}" alt="${esc(r.course)}">`:''}${badge}${toggle}</div></div><div class="eyebrow">${esc(r.course)}${teeLbl} · ${esc(r.fmt)}${(pr[curMatch]||{}).tee?` · Tee ${esc(pr[curMatch].tee)}`:''}</div>`;
   if(compact){
     const myStrokes=myCol.st;const mySide=myCol.t,them=OTHER[mySide];
     const siHoles=[];if(myStrokes>0){for(let hh=1;hh<=r.holes;hh++)if(strokesOnHole(myStrokes,curRound,hh))siHoles.push(hh)}
@@ -763,7 +770,7 @@ function renderPots(){
   $('#snakeArea').innerHTML=sg.length?`<div class="scroll"><table><tr><th>Round · Match</th><th>Group</th><th class="c">Snakes</th><th>Holder</th><th class="r">Owes</th></tr>${sg.map(g=>`<tr><td>R${g.n} M${g.mi+1}<br><span class="foot">${esc(g.course)}</span></td><td>${g.group.map(p=>`${esc(pname(p,true))} <span class="num">(${g.tps.filter(t=>t.pid===p).length})</span>`).join(', ')}</td><td class="c num">${g.tps.length}</td><td><b>${esc(pname(g.holder))}</b></td><td class="r num">$${g.owes}</td></tr>`).join('')}</table></div><div class="foot">Rate: $${esc((settings&&settings.snake&&settings.snake.rate)||1)} per snake per player in the group (change under Setup).</div>`:'<div class="empty">No three-putts logged yet. Nobody has the Snake.</div>';
   renderBets();
   const C=[['longestPutt','Longest Putt','Hole 18 · Ozarks National · Coastal Golf Academy'],['longestDrive','Longest Drive',"Hole 1 · Payne's Valley · Cape Fear Chiropractic"],['ctp','Closest to the Pin',"Hole 19 · Payne's Valley · Mulcare"],['tiebreak','Cup tiebreaker CTP (19th hole)',"Only if the Cup is tied after Saturday singles"]];
-  $('#compArea').innerHTML='<div class="kv">'+C.map(([k,l,s])=>{const v=comps[k]||{};return `<div class="tile"><div class="k">${esc(l)}</div><div class="foot" style="margin:0 0 6px">${esc(s)}</div><div class="row" style="gap:6px"><select id="cw_${k}" data-comp="pid" data-k="${k}" ${dis} style="flex:1 1 120px"><option value="">— winner —</option>${Object.keys(players).sort((a,b)=>players[a].name.localeCompare(players[b].name)).map(p=>`<option value="${p}" ${v.pid===p?'selected':''}>${esc(players[p].name)}</option>`).join('')}</select><input type="text" id="cd_${k}" data-comp="note" data-k="${k}" value="${esc(v.note||'')}" placeholder="distance / note" ${dis} style="flex:1 1 100px"></div></div>`}).join('')+'</div>';
+  $('#compArea').innerHTML='<div class="kv">'+C.map(([k,l,s])=>{const v=comps[k]||{};return `<div class="tile"><div class="row" style="justify-content:space-between;align-items:center"><div class="k">${esc(l)}</div>${compChip(k,false)}</div><div class="foot" style="margin:0 0 6px">${esc(s)}</div><div class="row" style="gap:6px"><select id="cw_${k}" data-comp="pid" data-k="${k}" ${dis} style="flex:1 1 120px"><option value="">— winner —</option>${Object.keys(players).sort((a,b)=>players[a].name.localeCompare(players[b].name)).map(p=>`<option value="${p}" ${v.pid===p?'selected':''}>${esc(players[p].name)}</option>`).join('')}</select><input type="text" id="cd_${k}" data-comp="note" data-k="${k}" value="${esc(v.note||'')}" placeholder="distance / note" ${dis} style="flex:1 1 100px"></div></div>`}).join('')+'</div>';
 }
 
 function renderSetup(){
@@ -892,6 +899,7 @@ setStatus('Connecting to the live scoreboard…');
   db.collection('bets').onSnapshot(snap=>{bets={};snap.docs.forEach(x=>{bets[x.id]=x.data()});if(tab==='pots')renderBets();renderChallenges()});
   db.doc('config/weather').onSnapshot(s=>{weather=s.exists?s.data():null;tickStrip()});
   db.doc('config/sponsor').onSnapshot(s=>{sponsor=s.exists?s.data():null;tickStrip()});
+  db.doc('config/comps').onSnapshot(s=>{csponsors=s.exists?s.data():null;render()});
   db.doc('config/logos').onSnapshot(s=>{logos=s.exists?s.data():null;applyLogos();render()});
 })();
 })();

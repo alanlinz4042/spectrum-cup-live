@@ -154,6 +154,26 @@ def export_side(side):
     return out
 
 
+COMP_KEYS = {"longestPutt": "logos/comp-longest-putt.png", "longestDrive": "logos/comp-longest-drive.png",
+             "ctp": "logos/comp-ctp.png"}
+
+
+def export_comps(c):
+    """config/comps → compSponsors: the on-course competition sponsors — name, https link, fixed logo path per key.
+    (side/comps, the free-text winners doc, is a different document and is never exported.)"""
+    if not isinstance(c, dict):
+        return {}
+    out = {}
+    for k, path in COMP_KEYS.items():
+        s = export_sponsor(c.get(k))
+        if s is None:
+            continue
+        if s.get("imageId"):
+            s["imageId"] = path
+        out[k] = s
+    return out
+
+
 def export_sponsor(s):
     if not isinstance(s, dict):
         return None
@@ -200,6 +220,8 @@ def build(dump, previous=None, listed=()):
                         lambda: export_side(load_collection(dump, "side")), {}),
         "sponsor": section("sponsor", "config", load_config(dump, "sponsor") is not None,
                            lambda: export_sponsor(load_config(dump, "sponsor")), None),
+        "compSponsors": section("compSponsors", "config", load_config(dump, "comps") is not None,
+                                lambda: export_comps(load_config(dump, "comps")), {}),
         "logos": dict(LOGOS),
         "stale": stale,
     }

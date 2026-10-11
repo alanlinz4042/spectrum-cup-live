@@ -70,6 +70,7 @@ const safePath=v=>typeof v==='string'&&SAFE_IMG.test(v)?v:'';
 const safeUrl=v=>typeof v==='string'&&/^https:\/\//.test(v)?v:'';
 const safeLogos=o=>{const out={};if(o&&typeof o==='object')Object.keys(o).forEach(k=>{const v=safePath(o[k]);if(v)out[k]=v});return out};
 const safeSponsor=o=>o&&typeof o==='object'?{name:String(o.name||''),url:safeUrl(o.url),imageId:safePath(o.imageId)}:null;
+const safeComps=o=>{const out={};if(o&&typeof o==='object')Object.keys(o).forEach(k=>{const c=safeSponsor(o[k]);if(c&&c.imageId)out[k]=c});return out};
 const POLL_MS=Math.max(1000,+(new URLSearchParams(location.search).get('poll'))||60000);
 let lastText='';
 async function pull(){
@@ -79,7 +80,7 @@ async function pull(){
     const text=await r.text();if(text===lastText)return;lastText=text;
     const d=JSON.parse(text);
     players=d.players||{};settings=d.settings||null;pairings=d.pairings||{};scores=d.scores||{};side=d.side||{};
-    sponsor=safeSponsor(d.sponsor);logos=safeLogos(d.logos);
+    sponsor=safeSponsor(d.sponsor);logos=safeLogos(d.logos);csponsors=safeComps(d.compSponsors);
     applyLogos();tickStrip();render();setStatus('');
     const n=$('#syncNote');if(n&&d.updatedAt){try{n.textContent=' · scores as of '+new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'}).format(new Date(d.updatedAt))+' CT'+(Array.isArray(d.stale)&&d.stale.length?' (partial refresh)':'')}catch(e){}}
   }catch(e){if(!lastText)setStatus('Scores are not available right now. Refresh in a minute.')}
@@ -153,7 +154,8 @@ def transform(t):
     t = sub(t, "</style>", "#ptally td,#ptally th{white-space:nowrap}\n</style>")
     # R9 blob URLs -> relative paths from data.json
     for a in ("`/_blob/${esc(s.imageId)}`", "`/_blob/${esc(L.event)}`", "url(/_blob/${esc(L.PS)})",
-              "url(/_blob/${esc(L.IL)})", "`/_blob/${esc(L[rid])}`", 'src="/_blob/${esc(L[t])}"'):
+              "url(/_blob/${esc(L.IL)})", "`/_blob/${esc(L[rid])}`", 'src="/_blob/${esc(L[t])}"',
+              "`/_blob/${esc(c.imageId)}`"):
         t = sub(t, a, a.replace("/_blob/", ""))
     # R10/R11 Snake dollar amounts
     t = rm(t, " ($${g.owes})")
