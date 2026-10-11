@@ -666,5 +666,22 @@
   "r4": "logos/r4.png",
   "r5": "logos/r5.png",
   "r6": "logos/r6.png"
+ },
+ "compSponsors": {
+  "longestPutt": {
+   "name": "Coastal Golf Academy",
+   "url": "https://www.coastalgolfacademy.com/",
+   "imageId": "logos/comp-longest-putt.png"
+  },
+  "longestDrive": {
+   "name": "Cape Fear Chiropractic",
+   "url": "https://capefearchiropractic.com/",
+   "imageId": "logos/comp-longest-drive.png"
+  },
+  "ctp": {
+   "name": "Mulcare",
+   "url": "https://www.mulcare.com/",
+   "imageId": "logos/comp-ctp.png"
+  }
  }
 }

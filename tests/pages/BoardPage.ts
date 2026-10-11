@@ -26,6 +26,7 @@ export class BoardPage {
   readonly liveMatches: Locator;
   readonly liveMatchStatuses: Locator;
   readonly cupRoundLogos: Locator;
+  readonly compChips: Locator;
   readonly privateSurfaces: Locator;
   readonly injectedImages: Locator;
 
@@ -52,6 +53,7 @@ export class BoardPage {
     this.liveMatches = page.locator('.lv-m');
     this.liveMatchStatuses = page.locator('.lv-m .thru');
     this.cupRoundLogos = page.locator('.cup-round .clogo');
+    this.compChips = page.locator('.cspon');
     this.privateSurfaces = page.locator('#meSel, #pickme, #p-score, #p-pots, #p-setup, #p-hcp');
     this.injectedImages = page.locator('img[src="x"], img[onerror]');
   }

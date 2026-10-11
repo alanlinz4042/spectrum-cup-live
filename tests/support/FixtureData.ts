@@ -72,6 +72,10 @@ export class FixtureData {
       r4: 'logos/r4.png',
     };
     d.sponsor = { name: 'Evil', url: 'javascript:window.__pwned=1', imageId: 'logos/sponsor.png' };
+    d.compSponsors = {
+      longestPutt: { name: 'Evil Putt', url: 'javascript:window.__pwned=1', imageId: 'logos/comp-longest-putt.png' },
+      ctp: { name: 'Off-origin', url: 'https://ok.example/', imageId: `${host}/comp-ctp.png` },
+    };
     return d;
   }
 

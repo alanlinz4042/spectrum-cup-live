@@ -86,6 +86,7 @@ it is non-empty). A change in staleness alone is published; `updatedAt` alone is
 | `settings` | `config/settings.json` | `previous.settings` (stale), else exit 2 | exit 2 |
 | `pairings` | `config/pairings.json` | `previous.pairings` (stale), else `{}` | `{}` |
 | `sponsor` | `config/sponsor.json` | `previous.sponsor` (stale), else `null` | `null` |
+| `compSponsors` | `config/comps.json` (on-course competition sponsors: name, https link, logo → `logos/comp-*.png`) | `previous.compSponsors` (stale), else `{}` | `{}` |
 | `players` | `players/` with ≥ 1 file | `previous.players` (stale), else exit 2 | same (an empty roster is never trusted) |
 | `scores` | `scores/` directory | `previous.scores` (stale), else `{}` | `{}` |
 | `side` | `side/` directory | `previous.side` (stale), else `{}` | `{}` |
