@@ -1,0 +1,13 @@
+{
+  "name": "spectrum-cup-live",
+  "private": true,
+  "description": "Public spectator mirror of the Spectrum Cup scoreboard (GitHub Pages)",
+  "scripts": {
+    "build": "python3 scripts/build.py",
+    "test": "playwright test -c tests/playwright.config.ts",
+    "test:unit": "python3 -m unittest discover -s tests -p 'test_*.py' -v"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}
