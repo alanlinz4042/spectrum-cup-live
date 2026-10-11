@@ -86,6 +86,7 @@ it is non-empty). A change in staleness alone is published; `updatedAt` alone is
 | `settings` | `config/settings.json` | `previous.settings` (stale), else exit 2 | exit 2 |
 | `pairings` | `config/pairings.json` | `previous.pairings` (stale), else `{}` | `{}` |
 | `sponsor` | `config/sponsor.json` | `previous.sponsor` (stale), else `null` | `null` |
+| *(never)* `bets` | — | the wagers/props collection is never read by any sync and never exported; `tests/test_sync.py` fails if a `bets`, `prop`, `stake` or `wager` key appears in the output | — |
 | `compSponsors` | `config/comps.json` (on-course competition sponsors: name, https link, logo → `logos/comp-*.png`) | `previous.compSponsors` (stale), else `{}` | `{}` |
 | `players` | `players/` with ≥ 1 file | `previous.players` (stale), else exit 2 | same (an empty roster is never trusted) |
 | `scores` | `scores/` directory | `previous.scores` (stale), else `{}` | `{}` |
