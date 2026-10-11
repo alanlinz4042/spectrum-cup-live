@@ -3,3 +3,4 @@ test-results/
 playwright-report/
 .dump/
 __pycache__/
+docs/data.json.bak

@@ -45,6 +45,29 @@ export class FixtureData {
     return d;
   }
 
+  /** Fixture with a script payload in a player's team (the one field that was interpolated raw into innerHTML). */
+  withTamperedTeam(pid: string, team: string): any {
+    const d = this.base();
+    d.players[pid] = { ...d.players[pid], team };
+    return d;
+  }
+
+  /** Fixture whose URL-bearing fields point off-origin: external logos, a javascript: sponsor link. */
+  withTamperedUrls(host: string): any {
+    const d = this.base();
+    d.logos = {
+      event: `${host}/event.png`,
+      PS: `x) , url(${host}/css-ps.png`,
+      IL: `${host}/il.png`,
+      r1: `${host}/r1.png" onerror="window.__pwned=1`,
+      r2: 'logos/../secret.png',
+      r3: 'javascript:window.__pwned=1',
+      r4: 'logos/r4.png',
+    };
+    d.sponsor = { name: 'Evil', url: 'javascript:window.__pwned=1', imageId: 'logos/sponsor.png' };
+    return d;
+  }
+
   /** Control case: the same private values pushed into a rendered field (the name), proving the detector sees them. */
   withPrivateValueInName(pid: string, value: string): any {
     const d = this.base();

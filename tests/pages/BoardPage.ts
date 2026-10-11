@@ -12,6 +12,10 @@ export class BoardPage {
   readonly tabs: Locator;
   readonly crest: Locator;
   readonly sponsorMark: Locator;
+  readonly sponsorLink: Locator;
+  readonly playerTally: Locator;
+  readonly playerTallyTeamPills: Locator;
+  readonly csp: Locator;
   readonly teamMarkPS: Locator;
   readonly boardTotals: Locator;
   readonly playerTallyRows: Locator;
@@ -32,6 +36,10 @@ export class BoardPage {
     this.tabs = page.locator('#tabs button');
     this.crest = page.locator('#crest');
     this.sponsorMark = page.locator('#sponTop img');
+    this.sponsorLink = page.locator('#sponTop');
+    this.playerTally = page.locator('#ptally');
+    this.playerTallyTeamPills = page.locator('#ptally td:nth-child(2) .pill');
+    this.csp = page.locator('meta[http-equiv="Content-Security-Policy"]');
     this.teamMarkPS = page.locator('.tmark.ps');
     this.boardTotals = page.locator('#board .tot');
     this.playerTallyRows = page.locator('#ptally tr');
@@ -90,5 +98,10 @@ export class BoardPage {
 
   renderedHtml() {
     return this.page.evaluate(() => document.body.innerHTML);
+  }
+
+  /** Set by the XSS probes in the tampered fixtures; must stay undefined. */
+  pwned() {
+    return this.page.evaluate(() => (window as any).__pwned);
   }
 }
