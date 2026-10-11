@@ -181,6 +181,150 @@ class SyncTests(unittest.TestCase):
             self.run_sync()
         self.assertEqual(cm.exception.code, 2)
 
+    def test_fresh_run_reports_empty_stale(self):
+        self.assertEqual(self.run_sync(), "CHANGED")
+        self.assertEqual(json.loads(self.read_out())["stale"], [])
+
+
+class FallbackTests(unittest.TestCase):
+    """A denied collection read leaves its source out of the dump; sync.py reuses the last published section."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.dump = os.path.join(self.tmp, "dump")
+        self.out = os.path.join(self.tmp, "out", "data.json")
+        make_dump(self.dump)
+        self.assertEqual(sync.run(self.dump, self.out), "CHANGED")
+        self.first = self.read_out()
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def read_out(self):
+        with open(self.out, encoding="utf-8") as f:
+            return json.load(f)
+
+    def drop(self, *parts):
+        p = os.path.join(self.dump, *parts)
+        shutil.rmtree(p) if os.path.isdir(p) else os.remove(p)
+
+    def test_missing_settings_falls_back_to_previous_and_marks_stale(self):
+        self.drop("config", "settings.json")
+        write(os.path.join(self.dump, "scores", "r1_p01.json"), dict(SCORE, holes={"1": 4, "2": 5, "3": 3}))
+        self.assertEqual(sync.run(self.dump, self.out), "CHANGED stale=settings")
+        d = self.read_out()
+        self.assertEqual(d["settings"], self.first["settings"])
+        self.assertEqual(d["scores"]["r1_p01"]["holes"]["3"], 3)  # the readable collections are still fresh
+        self.assertEqual(d["stale"], ["settings"])
+
+    def test_missing_whole_config_falls_back_for_all_three_docs(self):
+        self.drop("config")
+        self.assertEqual(sync.run(self.dump, self.out), "CHANGED stale=settings,pairings,sponsor")
+        d = self.read_out()
+        self.assertEqual(d["pairings"], PAIRINGS)
+        self.assertEqual(d["sponsor"]["name"], "Sponsor Co")
+
+    def test_missing_settings_without_previous_exits_2(self):
+        os.remove(self.out)
+        self.drop("config", "settings.json")
+        with self.assertRaises(SystemExit) as cm:
+            sync.run(self.dump, self.out)
+        self.assertEqual(cm.exception.code, 2)
+
+    def test_missing_pairings_and_sponsor_without_previous_are_defaults_not_stale(self):
+        os.remove(self.out)
+        self.drop("config", "pairings.json")
+        self.drop("config", "sponsor.json")
+        self.assertEqual(sync.run(self.dump, self.out), "CHANGED")
+        d = self.read_out()
+        self.assertEqual(d["pairings"], {})
+        self.assertIsNone(d["sponsor"])
+        self.assertEqual(d["stale"], [])
+
+    def test_missing_config_listed_means_docs_are_genuinely_absent(self):
+        self.drop("config", "pairings.json")
+        self.drop("config", "sponsor.json")
+        self.assertEqual(sync.run(self.dump, self.out, listed=("config",)), "CHANGED")
+        d = self.read_out()
+        self.assertEqual(d["pairings"], {})
+        self.assertIsNone(d["sponsor"])
+        self.assertEqual(d["stale"], [])
+
+    def test_missing_settings_listed_still_exits_2(self):
+        self.drop("config", "settings.json")
+        with self.assertRaises(SystemExit) as cm:
+            sync.run(self.dump, self.out, listed=("config",))
+        self.assertEqual(cm.exception.code, 2)
+
+    def test_missing_players_dir_falls_back(self):
+        self.drop("players")
+        self.assertEqual(sync.run(self.dump, self.out), "CHANGED stale=players")
+        self.assertEqual(self.read_out()["players"], self.first["players"])
+
+    def test_empty_players_dir_falls_back_even_when_listed(self):
+        self.drop("players")
+        os.makedirs(os.path.join(self.dump, "players"))
+        self.assertEqual(sync.run(self.dump, self.out, listed=("players",)), "CHANGED stale=players")
+        self.assertEqual(self.read_out()["players"], self.first["players"])
+
+    def test_missing_players_without_previous_exits_2(self):
+        os.remove(self.out)
+        self.drop("players")
+        with self.assertRaises(SystemExit) as cm:
+            sync.run(self.dump, self.out)
+        self.assertEqual(cm.exception.code, 2)
+
+    def test_absent_scores_dir_falls_back_by_default(self):
+        self.drop("scores")
+        self.assertEqual(sync.run(self.dump, self.out), "CHANGED stale=scores")
+        self.assertEqual(self.read_out()["scores"], self.first["scores"])
+
+    def test_absent_scores_dir_is_empty_when_listed(self):
+        self.drop("scores")
+        self.assertEqual(sync.run(self.dump, self.out, listed=("scores", "side")), "CHANGED")
+        d = self.read_out()
+        self.assertEqual(d["scores"], {})
+        self.assertEqual(d["stale"], [])
+
+    def test_present_but_empty_scores_dir_is_empty(self):
+        self.drop("scores")
+        os.makedirs(os.path.join(self.dump, "scores"))
+        self.assertEqual(sync.run(self.dump, self.out), "CHANGED")
+        self.assertEqual(self.read_out()["scores"], {})
+
+    def test_absent_side_dir_follows_the_scores_rule(self):
+        self.drop("side")
+        self.assertEqual(sync.run(self.dump, self.out), "CHANGED stale=side")
+        self.assertEqual(self.read_out()["side"], self.first["side"])
+        self.assertEqual(sync.run(self.dump, self.out, listed=("side",)), "CHANGED")
+        self.assertEqual(self.read_out()["side"], {})
+
+    def test_same_stale_result_twice_is_unchanged(self):
+        self.drop("config", "settings.json")
+        self.assertEqual(sync.run(self.dump, self.out), "CHANGED stale=settings")
+        self.assertEqual(sync.run(self.dump, self.out), "UNCHANGED stale=settings")
+
+    def test_staleness_change_alone_is_published(self):
+        self.drop("config", "settings.json")
+        sync.run(self.dump, self.out)
+        make_dump(self.dump)  # config readable again, identical content
+        self.assertEqual(sync.run(self.dump, self.out), "CHANGED")
+        self.assertEqual(self.read_out()["stale"], [])
+
+    def test_fallback_output_has_no_forbidden_keys(self):
+        self.drop("config")
+        self.drop("players")
+        sync.run(self.dump, self.out)
+        with open(self.out, encoding="utf-8") as f:
+            text = f.read()
+        for k in FORBIDDEN:
+            self.assertNotIn('"%s"' % k, text, k)
+
+    def test_cli_listed_flag(self):
+        self.drop("scores")
+        self.assertEqual(sync.main(["--dump", self.dump, "--out", self.out, "--listed", "scores, side"]), 0)
+        self.assertEqual(self.read_out()["scores"], {})
+
 
 if __name__ == "__main__":
     unittest.main()

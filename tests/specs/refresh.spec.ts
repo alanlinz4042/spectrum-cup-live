@@ -13,4 +13,17 @@ test.describe('refresh', { tag: '@refresh' }, () => {
     await expect(board.syncNote).toContainText('10:00 AM CT');
     expect(served.urls.length).toBeGreaterThan(1);
   });
+
+  test('flags a partial refresh when the sync fell back to stale sections', async ({ board, data, serveData }) => {
+    const served = await serveData(data.base());
+    await board.goto('?poll=1000');
+    await expect(board.syncNote).toContainText('scores as of');
+    await expect(board.syncNote).not.toContainText('partial refresh');
+
+    served.set(data.withStale(['settings']));
+    await expect(board.syncNote).toContainText('(partial refresh)', { timeout: 5_000 });
+
+    served.set(data.base());
+    await expect(board.syncNote).not.toContainText('partial refresh', { timeout: 5_000 });
+  });
 });

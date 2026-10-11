@@ -75,6 +75,13 @@ export class FixtureData {
     return d;
   }
 
+  /** Fixture published while one or more collections could not be read (sync.py fell back to the last copy). */
+  withStale(sections: string[]): any {
+    const d = this.base();
+    d.stale = sections;
+    return d;
+  }
+
   /** Control case: the same private values pushed into a rendered field (the name), proving the detector sees them. */
   withPrivateValueInName(pid: string, value: string): any {
     const d = this.base();
