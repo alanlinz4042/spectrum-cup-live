@@ -6,9 +6,15 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    # Wait a week before proposing a freshly published version (hijacked releases are usually pulled within days).
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    # Wait a week before proposing a freshly published version (hijacked releases are usually pulled within days).
+    cooldown:
+      default-days: 7
