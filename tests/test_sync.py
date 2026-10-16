@@ -26,6 +26,7 @@ MULL = {"p01": {"used": True, "round": "r1", "hole": 7, "gfm": True, "pot": Fals
 COMPS = {"longestPutt": {"pid": "p01", "note": "38 ft"}}
 COMP_SPONSORS = {"longestPutt": {"name": "Putt Co", "url": "https://putt.example/", "imageId": "0123456789abcdef0123456789abcdef"},
                  "ctp": {"name": "Pin Co", "url": "http://insecure.example", "imageId": "fedcba9876543210fedcba9876543210"},
+                 "mvp": {"name": "MVP Co", "url": "https://mvp.example/", "imageId": "abcdefabcdefabcdefabcdefabcdefab"},
                  "bogus": {"name": "Nope", "url": "https://x.example/", "imageId": "00000000000000000000000000000000"}}
 
 
@@ -78,7 +79,8 @@ class SyncTests(unittest.TestCase):
     def test_comp_sponsors_are_exported_with_fixed_logo_paths(self):
         self.run_sync()
         c = json.loads(self.read_out())["compSponsors"]
-        self.assertEqual(set(c), {"longestPutt", "ctp"})  # unknown keys dropped
+        self.assertEqual(set(c), {"longestPutt", "ctp", "mvp"})  # unknown keys dropped
+        self.assertEqual(c["mvp"], {"name": "MVP Co", "url": "https://mvp.example/", "imageId": "logos/comp-mvp.png"})
         self.assertEqual(c["longestPutt"], {"name": "Putt Co", "url": "https://putt.example/",
                                             "imageId": "logos/comp-longest-putt.png"})
         self.assertEqual(c["ctp"], {"name": "Pin Co", "imageId": "logos/comp-ctp.png"})  # http link dropped

@@ -158,7 +158,7 @@ def export_side(side):
 
 
 COMP_KEYS = {"longestPutt": "logos/comp-longest-putt.png", "longestDrive": "logos/comp-longest-drive.png",
-             "ctp": "logos/comp-ctp.png"}
+             "ctp": "logos/comp-ctp.png", "mvp": "logos/comp-mvp.png"}
 
 
 def export_comps(c):

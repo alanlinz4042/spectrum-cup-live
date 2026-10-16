@@ -120,7 +120,7 @@ function applyLogos(){const L=logos||{};const r=document.documentElement;const c
   r.classList.toggle('has-marks',!!(L.PS||L.IL))}
 function courseLogo(rid){const L=logos||{};return L[rid]?`${esc(L[rid])}`:''}
 // On-course competition sponsors: config/comps {longestPutt|longestDrive|ctp:{name,url,imageId}} → linked logo chips on the round that hosts the prize.
-const COMPS=[['longestPutt','Longest Putt','r1',18],['longestDrive','Longest Drive','r6',1],['ctp','Closest to the Pin','r6',19]];
+const COMPS=[['longestPutt','Longest Putt','r1',18],['longestDrive','Longest Drive','r6',1],['ctp','Closest to the Pin','r6',19],['mvp','Tournament MVP','',0]];
 let csponsors=null;
 function compChip(k,withLabel){const c=(csponsors||{})[k];if(!c||!c.imageId)return '';const d=COMPS.find(x=>x[0]===k);const src=`${esc(c.imageId)}`;const lbl=withLabel&&d?`<span>${esc(d[1])} · H${d[3]}</span>`:'';const href=c.url?` href="${esc(c.url)}" target="_blank" rel="noopener"`:'';return `<a class="cspon"${href} title="${esc((d?d[1]+' · ':'')+(c.name||''))}"><img src="${src}" alt="${esc(c.name||'')}">${lbl}</a>`}
 function roundComps(rid,withLabel){const h=COMPS.filter(x=>x[2]===rid).map(x=>compChip(x[0],withLabel)).join('');return h?`<div class="cspons">${h}</div>`:''}
@@ -169,7 +169,7 @@ function renderLive(){
   $('#dayChips').innerHTML=DAYS.map(d=>`<button class="chip ${d.k===liveDay?'on':''}" data-day="${d.k}">${d.label}</button>`).join('');
   const day=DAYS.find(d=>d.k===liveDay);let h='';
   day.rounds.forEach(rid=>{const r=RBY[rid];const p=roundPts(rid);
-    h+=`<div class="lv-round" data-course="${rid}"><div class="lv-head"><div class="lhs">${courseLogo(rid)?`<span class="cmark" style="--mark:url(${courseLogo(rid)})" aria-hidden="true"></span>`:''}<div class="t">R${r.n} · ${esc(r.course.replace(' Par 3',''))}<small>${esc(r.fmt)}</small></div></div>${roundComps(rid,true)}<div class="sc num"><span class="p">${fmtPts(p.PS)}</span><span class="d">–</span><span class="i">${fmtPts(p.IL)}</span></div></div>`;
+    h+=`<div class="lv-round" data-course="${rid}"><div class="lv-head"><div class="lhs">${courseLogo(rid)?`<span class="cmark" style="--mark:url(${courseLogo(rid)})" aria-hidden="true"></span>`:''}<div class="t">R${r.n} · ${esc(r.course.replace(' Par 3',''))}<small>${esc(r.fmt)}</small></div></div>${roundComps(rid,true)}<div class="sc num"><span class="tmark ps sm" aria-hidden="true"></span><span class="p">${fmtPts(p.PS)}</span><span class="d">–</span><span class="i">${fmtPts(p.IL)}</span><span class="tmark il sm" aria-hidden="true"></span></div></div>`;
     for(let i=0;i<r.matches;i++){const c=computeMatch(rid,i);const m=(pairings[rid]||[])[i]||{};
       if(!c.set){h+=`<div class="lv-m"><div class="n" style="color:var(--muted)">Match ${i+1}</div><div class="st"><div class="thru">Pairing not set</div></div><div></div></div>`;continue}
       const ov=c.segs.overall;const played=ov.played;
@@ -203,7 +203,7 @@ function renderCup(){
   b+=`<div class="lbl tag-il">${teamMark('IL')}Iron Legends</div>${rows.IL}<div class="tot num tag-il">${fmtPts(tot.IL)}</div>`;
   $('#board').innerHTML=b;
   // rounds
-  let h='';ROUNDS.forEach(r=>{const p=roundPts(r.id);h+=`<div class="card cup-round"><div class="rhead"><h2>${courseLogo(r.id)?`<img class="clogo" src="${courseLogo(r.id)}" alt="">`:''}Round ${r.n} · ${esc(r.course)}</h2>${roundComps(r.id,true)}<div class="rscore"><span class="pill ps ${p.PS>p.IL?'lead':''}">PS ${fmtPts(p.PS)}</span><span class="pill il ${p.IL>p.PS?'lead':''}">IL ${fmtPts(p.IL)}</span></div></div><div class="eyebrow" style="margin-bottom:8px">${esc(r.fmt)} · ${r.day}</div><div class="matchgrid">`;
+  let h='';ROUNDS.forEach(r=>{const p=roundPts(r.id);h+=`<div class="card cup-round"><div class="rhead"><h2>${courseLogo(r.id)?`<img class="clogo" src="${courseLogo(r.id)}" alt="">`:''}Round ${r.n} · ${esc(r.course)}</h2>${roundComps(r.id,true)}<div class="rscore"><span class="pill ps ${p.PS>p.IL?'lead':''}" aria-label="Pin Seekers ${fmtPts(p.PS)}">${teamMark('PS',16)||'PS '}${fmtPts(p.PS)}</span><span class="pill il ${p.IL>p.PS?'lead':''}" aria-label="Iron Legends ${fmtPts(p.IL)}">${teamMark('IL',16)||'IL '}${fmtPts(p.IL)}</span></div></div><div class="eyebrow" style="margin-bottom:8px">${esc(r.fmt)} · ${r.day}</div><div class="matchgrid">`;
     for(let i=0;i<r.matches;i++){const c=computeMatch(r.id,i);const m=(pairings[r.id]||[])[i]||{};
       if(!c.set){h+=`<div class="mcard"><div class="eyebrow">Match ${i+1}</div><div class="empty" style="margin-top:6px">Pairing not set</div></div>`;continue}
       h+=`<div class="mcard"><div class="eyebrow">Match ${i+1}${m.tee?` · Tee ${esc(m.tee)}`:''}</div><div class="who"><div class="ps">${(m.PS||[]).map(p=>esc(pname(p,true))).join('<br>')}</div><div class="vs">VS</div><div class="il">${(m.IL||[]).map(p=>esc(pname(p,true))).join('<br>')}</div></div><div class="segs">`;
@@ -211,14 +211,42 @@ function renderCup(){
       const ov=c.segs.overall;h+=`</div><div class="stand">${esc(ov.status||'Not started')}</div></div>`}
     h+='</div>'+highlightsHtml(r.id)+'</div>'});
   $('#cupRounds').innerHTML=h;
-  // player tally
-  const stats={};Object.keys(players).forEach(p=>stats[p]={pts:0,w:0,l:0,t:0,tp:0});
-  ROUNDS.forEach(r=>{for(let i=0;i<r.matches;i++){const c=computeMatch(r.id,i);if(!c.set)continue;const m=pairings[r.id][i];
-    ['PS','IL'].forEach(t=>{(m[t]||[]).forEach(pid=>{if(!stats[pid])return;stats[pid].pts+=c.pts[t];const ov=c.segs.overall;if(ov.complete){if(ov.w===t)stats[pid].w++;else if(ov.w==='T')stats[pid].t++;else stats[pid].l++}})});
-    ['PS','IL'].forEach(t=>{(m[t]||[]).forEach(pid=>{const d=scores[`${r.id}_${pid}`];if(d&&d.tp&&stats[pid])stats[pid].tp+=Object.values(d.tp).filter(Boolean).length})})}});
+  // ---------- player stats + MVP race ----------
+  // Cup points: every point a side wins is credited in full to each player on that side.
+  // Individual play (R1 both-count, R4 best ball, R5 stroke, R6 singles): every hole the player posted, gross and
+  // net to par off his own full course handicap (hole cap: triple bogey, quad when receiving), so players compare fairly.
+  // Team play (R2 scramble, R3 alt shot): the side's score to par, net of the full team allowance, shared by both partners.
+  // Tournament MVP (event guidebook): R1, R4, R5, R6 personal net + R2, R3 team score, summed to par, lowest wins.
+  // Tiebreak 1: no mulligan used beats a used mulligan. Tiebreak 2: fewest snakes (3-putts).
+  const stats={};Object.keys(players).forEach(p=>stats[p]={pts:0,w:0,l:0,t:0,tp:0,holes:0,gross:0,net:0,eag:0,bird:0,par:0,bog:0,dbl:0,mvp:0,mvpHoles:0,team:0,teamHoles:0,rounds:{}});
+  const hcpStrokes=(ch,rid,h)=>{if(!ch)return 0;if(ch>0)return strokesOnHole(ch,rid,h);const H=RBY[rid].holes;return siOf(rid,h)>H+ch?-1:0};
+  ROUNDS.forEach(r=>{for(let i=0;i<r.matches;i++){const c=computeMatch(r.id,i);const m=(pairings[r.id]||[])[i];if(!m)continue;
+    ['PS','IL'].forEach(t=>{(m[t]||[]).forEach(pid=>{const S=stats[pid];if(!S)return;
+      if(c.set){S.pts+=c.pts[t];const ov=c.segs.overall;if(ov.complete){if(ov.w===t)S.w++;else if(ov.w==='T')S.t++;else S.l++}}
+      const R={pts:c.set?c.pts[t]:0,team:TEAMBALL(r.format),holes:0,gross:0,net:0};
+      if(TEAMBALL(r.format)){const key=`${r.id}_m${i}_${t}`,d=scores[key];const raw=matchStrokes(r.id,i)[t].raw;const tch=raw==null?0:Math.round(raw);
+        if(d&&d.holes)Object.keys(d.holes).forEach(h=>{h=+h;const g=gross(key,h);if(g==null)return;const par=parOf(r.id,h);const st=hcpStrokes(tch,r.id,h);
+          R.holes++;R.gross+=g-par;R.net+=capped(g,par,st>0)-st-par});
+        S.team+=R.net;S.teamHoles+=R.holes}
+      else{const key=`${r.id}_${pid}`,d=scores[key];const ch=courseHcp(pid,r.id);
+        if(d&&d.holes)Object.keys(d.holes).forEach(h=>{h=+h;const g=gross(key,h);if(g==null)return;const par=parOf(r.id,h);const st=hcpStrokes(ch,r.id,h);const nt=capped(g,par,st>0)-st;
+          R.holes++;R.gross+=g-par;R.net+=nt-par;const dd=g-par;if(dd<=-2)S.eag++;else if(dd===-1)S.bird++;else if(dd===0)S.par++;else if(dd===1)S.bog++;else S.dbl++});
+        if(d&&d.tp)S.tp+=Object.values(d.tp).filter(Boolean).length;
+        S.holes+=R.holes;S.gross+=R.gross;S.net+=R.net}
+      S.mvp+=R.net;S.mvpHoles+=R.holes;S.rounds[r.id]=R})})}});
   const mul=side.mulligans||{};
-  const list=Object.keys(players).sort((a,b)=>stats[b].pts-stats[a].pts||players[a].name.localeCompare(players[b].name));
-  $('#ptally').innerHTML='<tr><th>Player</th><th>Team</th><th class="r">Pts</th><th class="c">W-L-T</th><th class="c">3-Putts</th><th class="c">Mulligan</th></tr>'+list.map(p=>`<tr><td>${esc(players[p].name)}${players[p].captain?' <span class="pill wait">C</span>':''}</td><td><span class="pill ${teamOf(p).toLowerCase()}">${teamOf(p)||'—'}</span></td><td class="r num"><b>${fmtPts(stats[p].pts)}</b></td><td class="c num">${stats[p].w}-${stats[p].l}-${stats[p].t}</td><td class="c num">${stats[p].tp}</td><td class="c">${mul[p]&&mul[p].used?'Used':'Available'}</td></tr>`).join('');
+  const toPar=n=>n===0?'E':(n>0?'+'+n:String(n));
+  const mulUsed=p=>mul[p]&&mul[p].used?1:0;
+  const list=Object.keys(players).sort((a,b)=>(stats[b].mvpHoles>0)-(stats[a].mvpHoles>0)||stats[a].mvp-stats[b].mvp||mulUsed(a)-mulUsed(b)||stats[a].tp-stats[b].tp||players[a].name.localeCompare(players[b].name));
+  const anyPlay=list.some(p=>stats[p].mvpHoles);
+  $('#mvpHead').innerHTML=`${compChip('mvp',false)}<div><div class="eyebrow" style="margin:0">MVP race</div><div class="foot" style="margin:2px 0 0">Lowest total to par wins: personal net in R1, R4, R5, R6 + team score in R2, R3. Ties: no mulligan used beats a used mulligan, then fewest snakes.</div></div>`;
+  $('#ptally').innerHTML='<tr><th class="c">#</th><th>Player</th><th>Team</th><th class="c" title="MVP total: personal net (R1, R4, R5, R6) + team score (R2, R3), to par">MVP</th><th class="c" title="Personal net, R1, R4, R5, R6">Indiv</th><th class="c" title="Team net, R2 and R3">Team</th><th class="r">Pts</th><th class="c">W-L-H</th><th class="c" title="Personal gross, R1, R4, R5, R6">Gross</th><th class="c">Holes</th><th class="c" title="Birdies or better">Bird+</th><th class="c">Par</th><th class="c">Bog</th><th class="c">Dbl+</th><th class="c" title="3-putts in individual rounds (2nd MVP tiebreak)">Snakes</th><th class="c">Mulligan</th></tr>'+
+    list.map((p,ix)=>{const S=stats[p];const lead=anyPlay&&ix===0;return `<tr class="${lead?'mvp-lead':''}"><td class="c num">${anyPlay?ix+1:'—'}</td><td>${lead?'<span class="mvp-crown" title="Current MVP leader">★</span> ':''}${esc(players[p].name)}${players[p].captain?' <span class="pill wait">C</span>':''}</td><td><span class="pill ${teamOf(p).toLowerCase()}">${teamOf(p)||'—'}</span></td><td class="c num"><b>${S.mvpHoles?toPar(S.mvp):'—'}</b></td><td class="c num">${S.holes?toPar(S.net):'—'}</td><td class="c num">${S.teamHoles?toPar(S.team):'—'}</td><td class="r num">${fmtPts(S.pts)}</td><td class="c num">${S.w}-${S.l}-${S.t}</td><td class="c num">${S.holes?toPar(S.gross):'—'}</td><td class="c num">${S.holes||'—'}</td><td class="c num">${S.eag+S.bird||'—'}</td><td class="c num">${S.par||'—'}</td><td class="c num">${S.bog||'—'}</td><td class="c num">${S.dbl||'—'}</td><td class="c num">${S.tp}</td><td class="c">${mul[p]&&mul[p].used?'Used':'Available'}</td></tr>`}).join('');
+  $('#pround').innerHTML='<tr><th>Player</th>'+ROUNDS.map(r=>`<th class="c">R${r.n}<br><span class="rsub">${esc(r.course.replace(' Par 3',''))}</span><br><span class="rsub">${TEAMBALL(r.format)?'team net · gross':'net · gross'}</span></th>`).join('')+'</tr>'+
+    list.map(p=>`<tr><td>${esc(pname(p,true))}</td>`+ROUNDS.map(r=>{const R=stats[p].rounds[r.id];if(!R)return '<td class="c muted">—</td>';
+      const pts=R.pts?`<div class="rp">${fmtPts(R.pts)} pt${R.pts===1?'':'s'}</div>`:'';
+      if(!R.holes)return `<td class="c">${pts||'<span class="muted">—</span>'}</td>`;
+      return `<td class="c num"><b>${toPar(R.net)}</b> · ${toPar(R.gross)}<div class="rh">${R.holes} holes</div>${pts}</td>`}).join('')+'</tr>').join('');
 }
 
 
