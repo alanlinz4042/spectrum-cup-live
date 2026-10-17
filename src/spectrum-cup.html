@@ -247,8 +247,8 @@ input[type=number]{width:64px;text-align:center}
 .draft{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.dcol{display:flex;flex-direction:column;gap:6px;min-width:0}
 .dhead{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:6px 8px;border-radius:8px}.dcol.ps .dhead{background:var(--ps-soft);color:var(--ps)}.dcol.il .dhead{background:var(--il-soft);color:var(--il);text-align:right}
 .pool{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}.pool .prow{grid-template-columns:1fr auto;gap:8px}
-.pick{display:flex;gap:6px}.pick button{min-width:52px;min-height:40px;border-radius:8px;border:2px solid;background:transparent;font-family:var(--display);font-weight:800;font-size:14px;letter-spacing:.06em;cursor:pointer}
-.pick .toPS{border-color:var(--ps);color:var(--ps)}.pick .toIL{border-color:var(--il);color:var(--il)}.pick button:active{transform:scale(.96)}.pick button:disabled{opacity:.35;cursor:default}
+.pick{display:flex;gap:6px}.pick button{min-width:56px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:2px solid;background:transparent;font-family:var(--display);font-weight:800;font-size:14px;letter-spacing:.06em;cursor:pointer}
+.pick button img{margin:0!important;vertical-align:middle!important}.pick .toPS{border-color:var(--ps);color:var(--ps)}.pick .toIL{border-color:var(--il);color:var(--il)}.pick button:active{transform:scale(.96)}.pick button:disabled{opacity:.35;cursor:default}
 .dcol .act{display:flex;gap:6px;justify-content:flex-start}.dcol.il .act{justify-content:flex-end}.dcol .act button{min-height:32px;padding:0 10px;border-radius:7px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer}.dcol .act button:disabled{display:none}
 .dhead .ok{float:right;opacity:.8}.dcol.il .dhead .ok{float:left}
 .dcol .prow{grid-template-columns:1fr;gap:4px}.dcol.ps .prow{border-color:var(--ps-soft)}.dcol.il .prow{border-color:var(--il-soft);text-align:right}.dcol.il .prow select{justify-self:end}
@@ -321,7 +321,10 @@ input[type=number]{width:64px;text-align:center}
 .pp-side.yes{border-color:var(--green);color:var(--green)}.pp-side.no{border-color:var(--ps);color:var(--ps)}.pp-side.yes.on{background:var(--green);color:#fff}.pp-side.no.on{background:var(--ps);color:#fff}.pp-side:disabled{opacity:.45;cursor:default}
 .pp-who{font-size:12px;color:var(--muted);margin-top:6px}.pp-who .y{color:var(--green);font-weight:700}.pp-who .n{color:var(--ps);font-weight:700}.pp-settle{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
 .holes{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;-webkit-overflow-scrolling:touch}.hchip{flex:0 0 auto;min-width:40px;min-height:40px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font-family:var(--display);font-weight:700;font-size:14px;cursor:pointer}.hchip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
-.pp-res{font-weight:700;margin-top:4px}.pp-res.yes{color:var(--green)}.pp-res.no{color:var(--ps)}.pp-res.void{color:var(--muted)}
+.pp-res{font-weight:700;margin-top:4px}
+.mvp-head{display:flex;align-items:center;gap:10px;margin:-2px 0 10px}.mvp-head .cspon img{height:40px;max-width:110px}
+#ptally tr.mvp-lead td{background:rgba(217,164,65,.16)}.mvp-crown{color:var(--gold,#c9a227)}#ptally th,#pround th{font-size:11px}
+#pround td{white-space:nowrap;vertical-align:top}#pround .rsub{font-weight:400;text-transform:none;letter-spacing:0;font-size:10px}#pround .rh,#pround .rp{font-size:10px;color:var(--muted)}#pround .rp{color:var(--fg);font-weight:600}.muted{color:var(--muted)}.pp-res.yes{color:var(--green)}.pp-res.no{color:var(--ps)}.pp-res.void{color:var(--muted)}
 .btn.go{background:var(--green)}.btn.no{background:transparent;color:var(--ps);border:1px solid var(--ps)}
 /* Live view */
 .lv-round{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
@@ -330,7 +333,7 @@ input[type=number]{width:64px;text-align:center}
 .lv-round[data-course="r1"]{--card-band:#6b3a1e}.lv-round[data-course="r2"]{--card-band:#1f3d2b}.lv-round[data-course="r3"]{--card-band:#3f3a33}.lv-round[data-course="r4"]{--card-band:#3a2416}.lv-round[data-course="r5"]{--card-band:#2e4a2e}.lv-round[data-course="r6"]{--card-band:#1c1c22}
 .lv-head .t{font-family:var(--card-serif);font-weight:700;font-size:19px;letter-spacing:.06em;text-transform:uppercase;line-height:1}
 .lv-head .t small{display:block;font-family:var(--card-serif);font-weight:600;font-size:11px;opacity:.85;margin-top:4px;letter-spacing:.1em;text-transform:uppercase}
-.lv-head .sc{font-family:var(--card-serif);font-weight:700;font-size:22px;display:flex;gap:8px;align-items:baseline}
+.lv-head .sc{font-family:var(--card-serif);font-weight:700;font-size:22px;display:flex;gap:8px;align-items:center}:root.has-marks .lv-head .sc .tmark.sm{height:20px;width:20px;display:block}.lv-head .sc .tmark.ps.sm{width:14px}
 .lv-head .sc .p{color:#ff8a80}.lv-head .sc .i{color:#8fb8ff}.lv-head .sc .d{opacity:.5;font-size:16px}
 .lv-m{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
 .lv-m{background:var(--panel)}
@@ -397,7 +400,7 @@ input[type=number]{width:64px;text-align:center}
     <div class="card"><h2>Cup Standings</h2><div class="scroll"><div class="board" id="board"></div></div>
       <div class="foot">Each match: front half 1 pt · back half 1 pt · overall 1 pt. Top of the Rock is winner-takes-all (3 pts). Ties split. 72 points total.</div></div>
     <div id="cupRounds"></div>
-    <div class="card"><h2>Player Tally</h2><div class="scroll"><table id="ptally"></table></div></div>
+    <div class="card"><h2>Player Stats</h2><div class="mvp-head" id="mvpHead"></div><div class="scroll"><table id="ptally"></table></div><div class="eyebrow" style="margin:14px 0 6px">By round · net · gross to par (R2 and R3 are the team's score, shared by both partners)</div><div class="scroll"><table id="pround"></table></div></div>
   </section>
 
   <section class="panel" id="p-score">
@@ -408,7 +411,7 @@ input[type=number]{width:64px;text-align:center}
 
   <section class="panel" id="p-hcp">
     <div class="card"><h2>Course Handicaps</h2>
-      <p class="foot" style="margin:0 0 8px">Course Handicap = Index × (holes ÷ 18) × Slope ÷ 113 + (Rating − Par), rounded. These are full course handicaps. In every match, strokes are given <b>relative to the lowest handicap in the group</b>, so the low player (or low team) gets 0 and everyone else gets the difference; the scoring sheet shows that working for your match.</p>
+      <p class="foot" style="margin:0 0 8px">Course Handicap = Index × (holes ÷ 18) × Slope ÷ 113 + (Rating − Par), rounded. These are full course handicaps. In every match, strokes are given <b>relative to the lowest handicap in the group</b>, so the low player (or low team) gets 0 and everyone else gets the difference; the scoring sheet shows that working for your match. <b>R2 Cliffhangers and R3 Top of the Rock are played gross</b> — no handicap strokes. Only the Saturday par 3 (R5 Mountain Top) uses handicaps.</p>
       <div class="scroll"><table id="hcpTable"></table></div></div>
     <div class="card"><h2>Handicap Index &amp; GHIN</h2>
       <p class="foot" style="margin:0 0 8px">Admins update each player's current GHIN Handicap Index here before Wednesday; everything downstream recalculates. Send your index to Alan or your captain.</p>
@@ -442,7 +445,7 @@ input[type=number]{width:64px;text-align:center}
   <section class="panel" id="p-setup">
     <div class="card"><h2>Roster &amp; Teams</h2>
       <p class="foot" style="margin:0 0 8px">Captains: set teams after Wednesday's draft. Phone numbers are from the guide.</p>
-      <div class="plist" id="roster"></div></div>
+      <div id="roster"></div></div>
     <div class="card"><h2>Pairings</h2>
       <p class="foot" style="margin:0 0 8px">Captains submit the next day's lineup after dinner. Pick players for each match.</p>
       <div class="chips" id="pairChips"></div><div id="pairArea"></div></div>
@@ -459,8 +462,8 @@ const TEAMS={PS:'Pin Seekers',IL:'Iron Legends'};
 const OTHER={PS:'IL',IL:'PS'};
 const ROUNDS=[
  {id:'r1',n:1,day:'Thu',course:'Ozarks National',format:'both',fmt:'2v2 Net · Both Scores Count',holes:18,segs:[['front','Front 9',1,9,1],['back','Back 9',10,18,1],['overall','Overall',1,18,1]],matches:3},
- {id:'r2',n:2,day:'Thu',course:'Cliffhangers Par 3',format:'scramble',fmt:'2v2 Scramble Match Play',holes:18,segs:[['front','Front 9',1,9,1],['back','Back 9',10,18,1],['overall','Overall',1,18,1]],matches:3},
- {id:'r3',n:3,day:'Fri',course:'Top of the Rock',format:'altshot',fmt:'2v2 Modified Alternate Shot · Winner Takes All',holes:9,segs:[['overall','Winner takes all',1,9,3]],matches:3},
+ {id:'r2',n:2,day:'Thu',course:'Cliffhangers Par 3',format:'scramble',gross:true,fmt:'2v2 Scramble Match Play · Gross, no handicaps',holes:18,segs:[['front','Front 9',1,9,1],['back','Back 9',10,18,1],['overall','Overall',1,18,1]],matches:3},
+ {id:'r3',n:3,day:'Fri',course:'Top of the Rock',format:'altshot',gross:true,fmt:'2v2 Modified Alternate Shot · Gross, no handicaps · Winner Takes All',holes:9,segs:[['overall','Winner takes all',1,9,3]],matches:3},
  {id:'r4',n:4,day:'Fri',course:'Buffalo Ridge',format:'bestball',fmt:'2v2 Net Best Ball',holes:18,segs:[['front','Front 9',1,9,1],['back','Back 9',10,18,1],['overall','Overall',1,18,1]],matches:3},
  {id:'r5',n:5,day:'Sat',course:'Mountain Top Par 3',format:'stroke',fmt:'1v1 Net Stroke Play',holes:13,segs:[['front','Front 6',1,6,1],['back','Back 7',7,13,1],['overall','Overall',1,13,1]],matches:6},
  {id:'r6',n:6,day:'Sat',course:"Payne's Valley",format:'match',fmt:'1v1 Net Match Play',holes:18,segs:[['front','Front 9',1,9,1],['back','Back 9',10,18,1],['overall','Overall',1,18,1]],matches:6},
@@ -491,6 +494,7 @@ function course(rid){return (settings&&settings.courses&&settings.courses[rid])|
 function parOf(rid,h){const c=course(rid);return c&&c.par&&c.par[h-1]?+c.par[h-1]:(RBY[rid].holes===18&&!/Par 3/.test(RBY[rid].course)?4:3)}
 function siOf(rid,h){const c=course(rid);return c&&c.si&&c.si[h-1]?+c.si[h-1]:h}
 function courseHcp(pid,rid){
+  if(RBY[rid].gross)return 0; // R2 Cliffhangers and R3 Top of the Rock are played gross: nobody gets a stroke
   const p=players[pid];if(!p||p.index==null||p.index==='')return null;
   const c=course(rid)||{};const r=RBY[rid];
   const slope=+c.slope||113;const parT=(c.par||[]).reduce((a,b)=>a+(+b||0),0)||r.holes*3;
@@ -573,7 +577,7 @@ function applyLogos(){const L=logos||{};const r=document.documentElement;const c
   r.classList.toggle('has-marks',!!(L.PS||L.IL))}
 function courseLogo(rid){const L=logos||{};return L[rid]?`/_blob/${esc(L[rid])}`:''}
 // On-course competition sponsors: config/comps {longestPutt|longestDrive|ctp:{name,url,imageId}} → linked logo chips on the round that hosts the prize.
-const COMPS=[['longestPutt','Longest Putt','r1',18],['longestDrive','Longest Drive','r6',1],['ctp','Closest to the Pin','r6',19]];
+const COMPS=[['longestPutt','Longest Putt','r1',18],['longestDrive','Longest Drive','r6',1],['ctp','Closest to the Pin','r6',19],['mvp','Tournament MVP','',0]];
 let csponsors=null;
 function compChip(k,withLabel){const c=(csponsors||{})[k];if(!c||!c.imageId)return '';const d=COMPS.find(x=>x[0]===k);const src=`/_blob/${esc(c.imageId)}`;const lbl=withLabel&&d?`<span>${esc(d[1])} · H${d[3]}</span>`:'';const href=c.url?` href="${esc(c.url)}" target="_blank" rel="noopener"`:'';return `<a class="cspon"${href} title="${esc((d?d[1]+' · ':'')+(c.name||''))}"><img src="${src}" alt="${esc(c.name||'')}">${lbl}</a>`}
 function roundComps(rid,withLabel){const h=COMPS.filter(x=>x[2]===rid).map(x=>compChip(x[0],withLabel)).join('');return h?`<div class="cspons">${h}</div>`:''}
@@ -711,7 +715,7 @@ function renderLive(){
   $('#dayChips').innerHTML=DAYS.map(d=>`<button class="chip ${d.k===liveDay?'on':''}" data-day="${d.k}">${d.label}</button>`).join('');
   const day=DAYS.find(d=>d.k===liveDay);let h='';
   day.rounds.forEach(rid=>{const r=RBY[rid];const p=roundPts(rid);
-    h+=`<div class="lv-round" data-course="${rid}"><div class="lv-head"><div class="lhs">${courseLogo(rid)?`<span class="cmark" style="--mark:url(${courseLogo(rid)})" aria-hidden="true"></span>`:''}<div class="t">R${r.n} · ${esc(r.course.replace(' Par 3',''))}<small>${esc(r.fmt)}</small></div></div>${roundComps(rid,true)}<div class="sc num"><span class="p">${fmtPts(p.PS)}</span><span class="d">–</span><span class="i">${fmtPts(p.IL)}</span></div></div>`;
+    h+=`<div class="lv-round" data-course="${rid}"><div class="lv-head"><div class="lhs">${courseLogo(rid)?`<span class="cmark" style="--mark:url(${courseLogo(rid)})" aria-hidden="true"></span>`:''}<div class="t">R${r.n} · ${esc(r.course.replace(' Par 3',''))}<small>${esc(r.fmt)}</small></div></div>${roundComps(rid,true)}<div class="sc num"><span class="tmark ps sm" aria-hidden="true"></span><span class="p">${fmtPts(p.PS)}</span><span class="d">–</span><span class="i">${fmtPts(p.IL)}</span><span class="tmark il sm" aria-hidden="true"></span></div></div>`;
     for(let i=0;i<r.matches;i++){const c=computeMatch(rid,i);const m=(pairings[rid]||[])[i]||{};
       if(!c.set){h+=`<div class="lv-m"><div class="n" style="color:var(--muted)">Match ${i+1}</div><div class="st"><div class="thru">Pairing not set</div></div><div></div></div>`;continue}
       const ov=c.segs.overall;const played=ov.played;
@@ -746,7 +750,7 @@ function renderCup(){
   b+=`<div class="lbl tag-il">${teamMark('IL')}Iron Legends</div>${rows.IL}<div class="tot num tag-il">${fmtPts(tot.IL)}</div>`;
   $('#board').innerHTML=b;
   // rounds
-  let h='';ROUNDS.forEach(r=>{const p=roundPts(r.id);h+=`<div class="card cup-round"><div class="rhead"><h2>${courseLogo(r.id)?`<img class="clogo" src="${courseLogo(r.id)}" alt="">`:''}Round ${r.n} · ${esc(r.course)}</h2>${roundComps(r.id,true)}<div class="rscore"><span class="pill ps ${p.PS>p.IL?'lead':''}">PS ${fmtPts(p.PS)}</span><span class="pill il ${p.IL>p.PS?'lead':''}">IL ${fmtPts(p.IL)}</span></div></div><div class="eyebrow" style="margin-bottom:8px">${esc(r.fmt)} · ${r.day}</div><div class="matchgrid">`;
+  let h='';ROUNDS.forEach(r=>{const p=roundPts(r.id);h+=`<div class="card cup-round"><div class="rhead"><h2>${courseLogo(r.id)?`<img class="clogo" src="${courseLogo(r.id)}" alt="">`:''}Round ${r.n} · ${esc(r.course)}</h2>${roundComps(r.id,true)}<div class="rscore"><span class="pill ps ${p.PS>p.IL?'lead':''}" aria-label="Pin Seekers ${fmtPts(p.PS)}">${teamMark('PS',16)||'PS '}${fmtPts(p.PS)}</span><span class="pill il ${p.IL>p.PS?'lead':''}" aria-label="Iron Legends ${fmtPts(p.IL)}">${teamMark('IL',16)||'IL '}${fmtPts(p.IL)}</span></div></div><div class="eyebrow" style="margin-bottom:8px">${esc(r.fmt)} · ${r.day}</div><div class="matchgrid">`;
     for(let i=0;i<r.matches;i++){const c=computeMatch(r.id,i);const m=(pairings[r.id]||[])[i]||{};
       if(!c.set){h+=`<div class="mcard"><div class="eyebrow">Match ${i+1}</div><div class="empty" style="margin-top:6px">Pairing not set</div></div>`;continue}
       h+=`<div class="mcard"><div class="eyebrow">Match ${i+1}${m.tee?` · Tee ${esc(m.tee)}`:''}</div><div class="who"><div class="ps">${(m.PS||[]).map(p=>esc(pname(p,true))).join('<br>')}</div><div class="vs">VS</div><div class="il">${(m.IL||[]).map(p=>esc(pname(p,true))).join('<br>')}</div></div><div class="segs">`;
@@ -754,14 +758,42 @@ function renderCup(){
       const ov=c.segs.overall;h+=`</div><div class="stand">${esc(ov.status||'Not started')}</div></div>`}
     h+='</div>'+highlightsHtml(r.id)+'</div>'});
   $('#cupRounds').innerHTML=h;
-  // player tally
-  const stats={};Object.keys(players).forEach(p=>stats[p]={pts:0,w:0,l:0,t:0,tp:0});
-  ROUNDS.forEach(r=>{for(let i=0;i<r.matches;i++){const c=computeMatch(r.id,i);if(!c.set)continue;const m=pairings[r.id][i];
-    ['PS','IL'].forEach(t=>{(m[t]||[]).forEach(pid=>{if(!stats[pid])return;stats[pid].pts+=c.pts[t];const ov=c.segs.overall;if(ov.complete){if(ov.w===t)stats[pid].w++;else if(ov.w==='T')stats[pid].t++;else stats[pid].l++}})});
-    ['PS','IL'].forEach(t=>{(m[t]||[]).forEach(pid=>{const d=scores[`${r.id}_${pid}`];if(d&&d.tp&&stats[pid])stats[pid].tp+=Object.values(d.tp).filter(Boolean).length})})}});
+  // ---------- player stats + MVP race ----------
+  // Cup points: every point a side wins is credited in full to each player on that side.
+  // Individual play (R1 both-count, R4 best ball, R5 stroke, R6 singles): every hole the player posted, gross and
+  // net to par off his own full course handicap (hole cap: triple bogey, quad when receiving), so players compare fairly.
+  // Team play (R2 scramble, R3 alt shot): the side's score to par, net of the full team allowance, shared by both partners.
+  // Tournament MVP (event guidebook): R1, R4, R5, R6 personal net + R2, R3 team score, summed to par, lowest wins.
+  // Tiebreak 1: no mulligan used beats a used mulligan. Tiebreak 2: fewest snakes (3-putts).
+  const stats={};Object.keys(players).forEach(p=>stats[p]={pts:0,w:0,l:0,t:0,tp:0,holes:0,gross:0,net:0,eag:0,bird:0,par:0,bog:0,dbl:0,mvp:0,mvpHoles:0,team:0,teamHoles:0,rounds:{}});
+  const hcpStrokes=(ch,rid,h)=>{if(!ch)return 0;if(ch>0)return strokesOnHole(ch,rid,h);const H=RBY[rid].holes;return siOf(rid,h)>H+ch?-1:0};
+  ROUNDS.forEach(r=>{for(let i=0;i<r.matches;i++){const c=computeMatch(r.id,i);const m=(pairings[r.id]||[])[i];if(!m)continue;
+    ['PS','IL'].forEach(t=>{(m[t]||[]).forEach(pid=>{const S=stats[pid];if(!S)return;
+      if(c.set){S.pts+=c.pts[t];const ov=c.segs.overall;if(ov.complete){if(ov.w===t)S.w++;else if(ov.w==='T')S.t++;else S.l++}}
+      const R={pts:c.set?c.pts[t]:0,team:TEAMBALL(r.format),holes:0,gross:0,net:0};
+      if(TEAMBALL(r.format)){const key=`${r.id}_m${i}_${t}`,d=scores[key];const raw=matchStrokes(r.id,i)[t].raw;const tch=raw==null?0:Math.round(raw);
+        if(d&&d.holes)Object.keys(d.holes).forEach(h=>{h=+h;const g=gross(key,h);if(g==null)return;const par=parOf(r.id,h);const st=hcpStrokes(tch,r.id,h);
+          R.holes++;R.gross+=g-par;R.net+=capped(g,par,st>0)-st-par});
+        S.team+=R.net;S.teamHoles+=R.holes}
+      else{const key=`${r.id}_${pid}`,d=scores[key];const ch=courseHcp(pid,r.id);
+        if(d&&d.holes)Object.keys(d.holes).forEach(h=>{h=+h;const g=gross(key,h);if(g==null)return;const par=parOf(r.id,h);const st=hcpStrokes(ch,r.id,h);const nt=capped(g,par,st>0)-st;
+          R.holes++;R.gross+=g-par;R.net+=nt-par;const dd=g-par;if(dd<=-2)S.eag++;else if(dd===-1)S.bird++;else if(dd===0)S.par++;else if(dd===1)S.bog++;else S.dbl++});
+        if(d&&d.tp)S.tp+=Object.values(d.tp).filter(Boolean).length;
+        S.holes+=R.holes;S.gross+=R.gross;S.net+=R.net}
+      S.mvp+=R.net;S.mvpHoles+=R.holes;S.rounds[r.id]=R})})}});
   const mul=side.mulligans||{};
-  const list=Object.keys(players).sort((a,b)=>stats[b].pts-stats[a].pts||players[a].name.localeCompare(players[b].name));
-  $('#ptally').innerHTML='<tr><th>Player</th><th>Team</th><th class="r">Pts</th><th class="c">W-L-T</th><th class="c">3-Putts</th><th class="c">Mulligan</th></tr>'+list.map(p=>`<tr><td>${esc(players[p].name)}${players[p].captain?' <span class="pill wait">C</span>':''}</td><td><span class="pill ${teamOf(p).toLowerCase()}">${teamOf(p)||'—'}</span></td><td class="r num"><b>${fmtPts(stats[p].pts)}</b></td><td class="c num">${stats[p].w}-${stats[p].l}-${stats[p].t}</td><td class="c num">${stats[p].tp}</td><td class="c">${mul[p]&&mul[p].used?'Used':'Available'}</td></tr>`).join('');
+  const toPar=n=>n===0?'E':(n>0?'+'+n:String(n));
+  const mulUsed=p=>mul[p]&&mul[p].used?1:0;
+  const list=Object.keys(players).sort((a,b)=>(stats[b].mvpHoles>0)-(stats[a].mvpHoles>0)||stats[a].mvp-stats[b].mvp||mulUsed(a)-mulUsed(b)||stats[a].tp-stats[b].tp||players[a].name.localeCompare(players[b].name));
+  const anyPlay=list.some(p=>stats[p].mvpHoles);
+  $('#mvpHead').innerHTML=`${compChip('mvp',false)}<div><div class="eyebrow" style="margin:0">MVP race</div><div class="foot" style="margin:2px 0 0">Lowest total to par wins: personal net in R1, R4, R5, R6 + team gross in R2, R3. Ties: no mulligan used beats a used mulligan, then fewest snakes.</div></div>`;
+  $('#ptally').innerHTML='<tr><th class="c">#</th><th>Player</th><th>Team</th><th class="c" title="MVP total: personal net (R1, R4, R5, R6) + team score (R2, R3), to par">MVP</th><th class="c" title="Personal net, R1, R4, R5, R6">Indiv</th><th class="c" title="Team gross, R2 and R3">Team</th><th class="r">Pts</th><th class="c">W-L-H</th><th class="c" title="Personal gross, R1, R4, R5, R6">Gross</th><th class="c">Holes</th><th class="c" title="Birdies or better">Bird+</th><th class="c">Par</th><th class="c">Bog</th><th class="c">Dbl+</th><th class="c" title="3-putts in individual rounds (2nd MVP tiebreak)">Snakes</th><th class="c">Mulligan</th></tr>'+
+    list.map((p,ix)=>{const S=stats[p];const lead=anyPlay&&ix===0;return `<tr class="${lead?'mvp-lead':''}"><td class="c num">${anyPlay?ix+1:'—'}</td><td>${lead?'<span class="mvp-crown" title="Current MVP leader">★</span> ':''}${esc(players[p].name)}${players[p].captain?' <span class="pill wait">C</span>':''}</td><td><span class="pill ${teamOf(p).toLowerCase()}">${teamOf(p)||'—'}</span></td><td class="c num"><b>${S.mvpHoles?toPar(S.mvp):'—'}</b></td><td class="c num">${S.holes?toPar(S.net):'—'}</td><td class="c num">${S.teamHoles?toPar(S.team):'—'}</td><td class="r num">${fmtPts(S.pts)}</td><td class="c num">${S.w}-${S.l}-${S.t}</td><td class="c num">${S.holes?toPar(S.gross):'—'}</td><td class="c num">${S.holes||'—'}</td><td class="c num">${S.eag+S.bird||'—'}</td><td class="c num">${S.par||'—'}</td><td class="c num">${S.bog||'—'}</td><td class="c num">${S.dbl||'—'}</td><td class="c num">${S.tp}</td><td class="c">${mul[p]&&mul[p].used?'Used':'Available'}</td></tr>`}).join('');
+  $('#pround').innerHTML='<tr><th>Player</th>'+ROUNDS.map(r=>`<th class="c">R${r.n}<br><span class="rsub">${esc(r.course.replace(' Par 3',''))}</span><br><span class="rsub">${r.gross?'team gross':'net · gross'}</span></th>`).join('')+'</tr>'+
+    list.map(p=>`<tr><td>${esc(pname(p,true))}</td>`+ROUNDS.map(r=>{const R=stats[p].rounds[r.id];if(!R)return '<td class="c muted">—</td>';
+      const pts=R.pts?`<div class="rp">${fmtPts(R.pts)} pt${R.pts===1?'':'s'}</div>`:'';
+      if(!R.holes)return `<td class="c">${pts||'<span class="muted">—</span>'}</td>`;
+      return `<td class="c num"><b>${toPar(R.net)}</b>${r.gross?'':' · '+toPar(R.gross)}<div class="rh">${R.holes} holes</div>${pts}</td>`}).join('')+'</tr>').join('');
 }
 
 function renderScore(){
@@ -792,7 +824,7 @@ function renderScore(){
     const myStrokes=myCol.st;const mySide=myCol.t,them=OTHER[mySide];
     const siHoles=[];if(myStrokes>0){for(let hh=1;hh<=r.holes;hh++)if(strokesOnHole(myStrokes,curRound,hh))siHoles.push(hh)}
     // show the working so the number reconciles with the Handicaps tab
-    let why='';if(TEAMBALL(r.format)){const mine=ms[mySide].raw,theirs=ms[them].raw;if(mine!=null&&theirs!=null){const al=(settings&&settings.allow)||{};const rule=r.format==='scramble'?`${al.scrambleLow??35}% low + ${al.scrambleHigh??15}% high`:`${al.altshot??50}% of combined`;why=`Team allowance (${rule}): yours ${mine.toFixed(1)} vs theirs ${theirs.toFixed(1)}. Strokes go to the higher side only: ${myStrokes?'you':'they'} get ${Math.max(myStrokes,ms[them].strokes)}.`}}
+    let why='';if(r.gross)why='Gross round: no handicap strokes for anyone. Scores count as played.';else if(TEAMBALL(r.format)){const mine=ms[mySide].raw,theirs=ms[them].raw;if(mine!=null&&theirs!=null){const al=(settings&&settings.allow)||{};const rule=r.format==='scramble'?`${al.scrambleLow??35}% low + ${al.scrambleHigh??15}% high`:`${al.altshot??50}% of combined`;why=`Team allowance (${rule}): yours ${mine.toFixed(1)} vs theirs ${theirs.toFixed(1)}. Strokes go to the higher side only: ${myStrokes?'you':'they'} get ${Math.max(myStrokes,ms[them].strokes)}.`}}
     else{const myCh=courseHcp(me,curRound);const all=[...ms.PS.players,...ms.IL.players].map(pid=>courseHcp(pid,curRound)).filter(v=>v!=null);const low=all.length?Math.min(...all):0;if(myCh!=null)why=`Your course handicap here is ${myCh<0?'+'+Math.abs(myCh):myCh}; the low in this match is ${low<0?'+'+Math.abs(low):low}. Strokes are the difference.`}
     h+=`<div class="strokebar"><span>${TEAMBALL(r.format)?'Your team gets':'You get'} <b>${myStrokes} stroke${myStrokes===1?'':'s'}</b>${siHoles.length?' · holes '+siHoles.join(', '):''}</span><span class="save" id="saveMsg">Live</span></div>${why?`<div class="foot" style="margin:2px 0 6px">${esc(why)}</div>`:''}`;
     const dis=mayEdit(myCol.pids||[myCol.pid])?'':'disabled';
@@ -808,7 +840,7 @@ function renderScore(){
     h+=`</div><div class="foot" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span>Max: triple bogey (quad with a stroke)</span><span>${att}</span></div></div><div class="band wm"><span class="sub">Big Cedar Lodge · Hollister, MO</span><span class="rule"></span><span class="sub">Swings for the Spectrum Cup 2026</span></div></div>`;
     $('#scoreArea').innerHTML=h;return;
   }
-  h+=`<div class="strokes">Strokes in this match (relative to low handicap): ${strokeLine}${TEAMBALL(r.format)?' · team allowance applied':''}. Max score: triple bogey (quad with a stroke).${mode==='self'&&!isAdmin?' You can enter only your own column; captains and Alan can correct any score.':''} <span class="save" id="saveMsg" style="color:var(--ok);font-weight:600"></span></div>`;
+  h+=`<div class="strokes">${r.gross?'Gross round, no handicap strokes: ':'Strokes in this match (relative to low handicap): '}${strokeLine}${TEAMBALL(r.format)&&!r.gross?' · team allowance applied':''}. Max score: triple bogey (quad with a stroke).${mode==='self'&&!isAdmin?' You can enter only your own column; captains and Alan can correct any score.':''} <span class="save" id="saveMsg" style="color:var(--ok);font-weight:600"></span></div>`;
   const gcols=`auto repeat(${cols.length},minmax(58px,1fr)) 44px`;
   h+=`<div class="scroll"><div class="sheet" style="min-width:${110+cols.length*66}px"><div class="h" style="grid-template-columns:${gcols}"><div class="colhd">Hole<small>par · si</small></div>${cols.map(cc=>`<div class="colhd" style="color:var(--${cc.t.toLowerCase()})">${esc(cc.label)}<small>${esc(cc.sub)}</small></div>`).join('')}<div class="colhd">Hole</div></div>`;
   for(let hh=1;hh<=r.holes;hh++){const hr=c.holes[hh-1];const par=parOf(curRound,hh);
@@ -829,7 +861,7 @@ function renderScore(){
 function renderHcp(){
   const ids=Object.keys(players).sort((a,b)=>(+players[a].index||0)-(+players[b].index||0));
   let h='<tr><th>Player</th><th class="r">Index</th>'+ROUNDS.map(r=>`<th class="c">R${r.n}<br><span style="font-weight:400;text-transform:none;letter-spacing:0">${esc(r.course.replace(' Par 3',''))}</span></th>`).join('')+'</tr>';
-  ids.forEach(p=>{h+=`<tr><td><span class="tag-${teamOf(p).toLowerCase()||'t'}">${esc(players[p].name)}</span></td><td class="r num">${players[p].index==null||players[p].index===''?'—':(+players[p].index<0?'+'+Math.abs(+players[p].index).toFixed(1):(+players[p].index).toFixed(1))}</td>`+ROUNDS.map(r=>{const ch=courseHcp(p,r.id);return `<td class="c num"><b>${ch==null?'—':ch<0?'+'+Math.abs(ch):ch}</b></td>`}).join('')+'</tr>'});
+  ids.forEach(p=>{h+=`<tr><td><span class="tag-${teamOf(p).toLowerCase()||'t'}">${esc(players[p].name)}</span></td><td class="r num">${players[p].index==null||players[p].index===''?'—':(+players[p].index<0?'+'+Math.abs(+players[p].index).toFixed(1):(+players[p].index).toFixed(1))}</td>`+ROUNDS.map(r=>{if(r.gross)return '<td class="c muted">gross</td>';const ch=courseHcp(p,r.id);return `<td class="c num"><b>${ch==null?'—':ch<0?'+'+Math.abs(ch):ch}</b></td>`}).join('')+'</tr>'});
   $('#hcpTable').innerHTML=h;
   const dis=isAdmin?'':'disabled';
   $('#idxTable').innerHTML='<tr><th>Player</th><th>Home club</th><th>GHIN #</th><th>Index</th></tr>'+Object.keys(players).sort((a,b)=>players[a].name.localeCompare(players[b].name)).map(p=>`<tr><td>${esc(players[p].name)}</td><td><input type="text" id="club_${p}" data-pf="club" data-p="${p}" value="${esc(players[p].club||'')}" ${dis} style="width:170px"></td><td><input type="text" inputmode="numeric" id="ghin_${p}" data-pf="ghin" data-p="${p}" value="${esc(players[p].ghin||'')}" ${dis} style="width:110px"></td><td><input type="number" step="0.1" id="idx_${p}" data-pf="index" data-p="${p}" value="${players[p].index??''}" ${dis} style="width:76px"></td></tr>`).join('')+'<tr><td colspan="4" class="foot">Enter plus handicaps as negative numbers (e.g. +2.1 → -2.1).</td></tr>';
@@ -861,7 +893,7 @@ function renderSetup(){
   const ids=Object.keys(players).sort((a,b)=>(teamOf(a)||'Z').localeCompare(teamOf(b)||'Z')||(players[a].captain?-1:players[b].captain?1:0)||players[a].name.localeCompare(players[b].name));
   const side=Object.keys(players).length/2|0;
   const assigned=(p)=>{const t=teamOf(p);const lock=LOCKED_TEAM[p];return `<div class="prow"><div><div class="n">${esc(players[p].name)}</div></div>${lock?`<span class="pill ${lock==='PS'?'ps':'il'}" title="Captain — team is fixed">Captain</span>`:`<div class="act"><button data-draft="${p}" data-to="${t==='PS'?'IL':'PS'}" ${dis} title="Move to the other team">⇄ Swap</button><button data-draft="${p}" data-to="" ${dis} title="Back to the pool">× Drop</button></div>`}</div>`};
-  const poolRow=(p)=>`<div class="prow"><div><div class="n">${esc(players[p].name)}</div><div class="s">${esc(players[p].phone||'')}${players[p].ghin?' · GHIN '+esc(players[p].ghin):''}${players[p].index!=null?' · idx '+esc(players[p].index):''}</div></div><div class="pick"><button class="toPS" data-draft="${p}" data-to="PS" ${dis} aria-label="Draft to Pin Seekers">PS</button><button class="toIL" data-draft="${p}" data-to="IL" ${dis} aria-label="Draft to Iron Legends">IL</button></div></div>`;
+  const poolRow=(p)=>`<div class="prow"><div><div class="n">${esc(players[p].name)}</div><div class="s">${esc(players[p].phone||'')}${players[p].ghin?' · GHIN '+esc(players[p].ghin):''}${players[p].index!=null?' · idx '+esc(players[p].index):''}</div></div><div class="pick"><button class="toPS" data-draft="${p}" data-to="PS" ${dis} aria-label="Draft to Pin Seekers" title="Pin Seekers">${teamMark('PS',22)||'PS'}</button><button class="toIL" data-draft="${p}" data-to="IL" ${dis} aria-label="Draft to Iron Legends" title="Iron Legends">${teamMark('IL',22)||'IL'}</button></div></div>`;
   const ps=ids.filter(p=>teamOf(p)==='PS'),il=ids.filter(p=>teamOf(p)==='IL'),un=ids.filter(p=>!teamOf(p));
   const head=(t,n)=>`<div class="dhead">${t==='PS'?'Pin Seekers':'Iron Legends'} · ${n}/${side}${n>=side?'<span class="ok">✓</span>':''}</div>`;
   $('#roster').innerHTML=ids.length?(un.length?`<div class="eyebrow" style="margin-bottom:6px">Draft pool · ${un.length} left · tap a team to pick</div><div class="pool">${un.map(poolRow).join('')}</div>`:`<div class="eyebrow" style="margin-bottom:8px">Draft complete · every player has a team</div>`)+`<div class="draft"><div class="dcol ps">${head('PS',ps.length)}${ps.map(assigned).join('')||'<div class="empty">No picks yet</div>'}</div><div class="dcol il">${head('IL',il.length)}${il.map(assigned).join('')||'<div class="empty">No picks yet</div>'}</div></div>`:'<div class="empty">No players loaded yet. The roster is seeded by Alan from the tournament guide.</div>';

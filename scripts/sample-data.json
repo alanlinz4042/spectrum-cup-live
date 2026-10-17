@@ -682,6 +682,11 @@
    "name": "Mulcare",
    "url": "https://www.mulcare.com/",
    "imageId": "logos/comp-ctp.png"
+  },
+  "mvp": {
+   "name": "Luca Partners",
+   "url": "https://www.luca-partners.com/",
+   "imageId": "logos/comp-mvp.png"
   }
  }
 }

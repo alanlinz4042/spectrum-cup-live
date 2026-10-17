@@ -41,7 +41,7 @@ export class BoardPage {
     this.sponsorMark = page.locator('#sponTop img');
     this.sponsorLink = page.locator('#sponTop');
     this.playerTally = page.locator('#ptally');
-    this.playerTallyTeamPills = page.locator('#ptally td:nth-child(2) .pill');
+    this.playerTallyTeamPills = page.locator('#ptally td:nth-child(3) .pill');
     this.csp = page.locator('meta[http-equiv="Content-Security-Policy"]');
     this.teamMarkPS = page.locator('.tmark.ps');
     this.boardTotals = page.locator('#board .tot');

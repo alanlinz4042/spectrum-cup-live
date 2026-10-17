@@ -254,8 +254,8 @@ input[type=number]{width:64px;text-align:center}
 .draft{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.dcol{display:flex;flex-direction:column;gap:6px;min-width:0}
 .dhead{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:6px 8px;border-radius:8px}.dcol.ps .dhead{background:var(--ps-soft);color:var(--ps)}.dcol.il .dhead{background:var(--il-soft);color:var(--il);text-align:right}
 .pool{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}.pool .prow{grid-template-columns:1fr auto;gap:8px}
-.pick{display:flex;gap:6px}.pick button{min-width:52px;min-height:40px;border-radius:8px;border:2px solid;background:transparent;font-family:var(--display);font-weight:800;font-size:14px;letter-spacing:.06em;cursor:pointer}
-.pick .toPS{border-color:var(--ps);color:var(--ps)}.pick .toIL{border-color:var(--il);color:var(--il)}.pick button:active{transform:scale(.96)}.pick button:disabled{opacity:.35;cursor:default}
+.pick{display:flex;gap:6px}.pick button{min-width:56px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:2px solid;background:transparent;font-family:var(--display);font-weight:800;font-size:14px;letter-spacing:.06em;cursor:pointer}
+.pick button img{margin:0!important;vertical-align:middle!important}.pick .toPS{border-color:var(--ps);color:var(--ps)}.pick .toIL{border-color:var(--il);color:var(--il)}.pick button:active{transform:scale(.96)}.pick button:disabled{opacity:.35;cursor:default}
 .dcol .act{display:flex;gap:6px;justify-content:flex-start}.dcol.il .act{justify-content:flex-end}.dcol .act button{min-height:32px;padding:0 10px;border-radius:7px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer}.dcol .act button:disabled{display:none}
 .dhead .ok{float:right;opacity:.8}.dcol.il .dhead .ok{float:left}
 .dcol .prow{grid-template-columns:1fr;gap:4px}.dcol.ps .prow{border-color:var(--ps-soft)}.dcol.il .prow{border-color:var(--il-soft);text-align:right}.dcol.il .prow select{justify-self:end}
@@ -328,7 +328,10 @@ input[type=number]{width:64px;text-align:center}
 .pp-side.yes{border-color:var(--green);color:var(--green)}.pp-side.no{border-color:var(--ps);color:var(--ps)}.pp-side.yes.on{background:var(--green);color:#fff}.pp-side.no.on{background:var(--ps);color:#fff}.pp-side:disabled{opacity:.45;cursor:default}
 .pp-who{font-size:12px;color:var(--muted);margin-top:6px}.pp-who .y{color:var(--green);font-weight:700}.pp-who .n{color:var(--ps);font-weight:700}.pp-settle{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
 .holes{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;-webkit-overflow-scrolling:touch}.hchip{flex:0 0 auto;min-width:40px;min-height:40px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font-family:var(--display);font-weight:700;font-size:14px;cursor:pointer}.hchip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
-.pp-res{font-weight:700;margin-top:4px}.pp-res.yes{color:var(--green)}.pp-res.no{color:var(--ps)}.pp-res.void{color:var(--muted)}
+.pp-res{font-weight:700;margin-top:4px}
+.mvp-head{display:flex;align-items:center;gap:10px;margin:-2px 0 10px}.mvp-head .cspon img{height:40px;max-width:110px}
+#ptally tr.mvp-lead td{background:rgba(217,164,65,.16)}.mvp-crown{color:var(--gold,#c9a227)}#ptally th,#pround th{font-size:11px}
+#pround td{white-space:nowrap;vertical-align:top}#pround .rsub{font-weight:400;text-transform:none;letter-spacing:0;font-size:10px}#pround .rh,#pround .rp{font-size:10px;color:var(--muted)}#pround .rp{color:var(--fg);font-weight:600}.muted{color:var(--muted)}.pp-res.yes{color:var(--green)}.pp-res.no{color:var(--ps)}.pp-res.void{color:var(--muted)}
 .btn.go{background:var(--green)}.btn.no{background:transparent;color:var(--ps);border:1px solid var(--ps)}
 /* Live view */
 .lv-round{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
@@ -337,7 +340,7 @@ input[type=number]{width:64px;text-align:center}
 .lv-round[data-course="r1"]{--card-band:#6b3a1e}.lv-round[data-course="r2"]{--card-band:#1f3d2b}.lv-round[data-course="r3"]{--card-band:#3f3a33}.lv-round[data-course="r4"]{--card-band:#3a2416}.lv-round[data-course="r5"]{--card-band:#2e4a2e}.lv-round[data-course="r6"]{--card-band:#1c1c22}
 .lv-head .t{font-family:var(--card-serif);font-weight:700;font-size:19px;letter-spacing:.06em;text-transform:uppercase;line-height:1}
 .lv-head .t small{display:block;font-family:var(--card-serif);font-weight:600;font-size:11px;opacity:.85;margin-top:4px;letter-spacing:.1em;text-transform:uppercase}
-.lv-head .sc{font-family:var(--card-serif);font-weight:700;font-size:22px;display:flex;gap:8px;align-items:baseline}
+.lv-head .sc{font-family:var(--card-serif);font-weight:700;font-size:22px;display:flex;gap:8px;align-items:center}:root.has-marks .lv-head .sc .tmark.sm{height:20px;width:20px;display:block}.lv-head .sc .tmark.ps.sm{width:14px}
 .lv-head .sc .p{color:#ff8a80}.lv-head .sc .i{color:#8fb8ff}.lv-head .sc .d{opacity:.5;font-size:16px}
 .lv-m{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
 .lv-m{background:var(--panel)}
@@ -398,7 +401,7 @@ input[type=number]{width:64px;text-align:center}
     <div class="card"><h2>Cup Standings</h2><div class="scroll"><div class="board" id="board"></div></div>
       <div class="foot">Each match: front half 1 pt · back half 1 pt · overall 1 pt. Top of the Rock is winner-takes-all (3 pts). Ties split. 72 points total.</div></div>
     <div id="cupRounds"></div>
-    <div class="card"><h2>Player Tally</h2><div class="scroll"><table id="ptally"></table></div></div>
+    <div class="card"><h2>Player Stats</h2><div class="mvp-head" id="mvpHead"></div><div class="scroll"><table id="ptally"></table></div><div class="eyebrow" style="margin:14px 0 6px">By round · net · gross to par (R2 and R3 are the team's score, shared by both partners)</div><div class="scroll"><table id="pround"></table></div></div>
   </section>
 
   
