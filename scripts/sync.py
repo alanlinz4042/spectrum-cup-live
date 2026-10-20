@@ -29,7 +29,7 @@ LOGOS = {"event": "logos/event.png", "PS": "logos/ps.png", "IL": "logos/il.png",
          "r1": "logos/r1.png", "r2": "logos/r2.png", "r3": "logos/r3.png",
          "r4": "logos/r4.png", "r5": "logos/r5.png", "r6": "logos/r6.png"}
 COURSE_KEYS = ("name", "par", "si", "rating", "slope", "tee")
-ALLOW_KEYS = ("altshot", "scrambleHigh", "scrambleLow")
+ALLOW_KEYS = ("altshot", "scrambleHigh", "scrambleLow", "hcpPct")
 TEAMS = ("PS", "IL")
 ROUND_IDS = ("r1", "r2", "r3", "r4", "r5", "r6")
 
@@ -158,7 +158,7 @@ def export_side(side):
 
 
 COMP_KEYS = {"longestPutt": "logos/comp-longest-putt.png", "longestDrive": "logos/comp-longest-drive.png",
-             "ctp": "logos/comp-ctp.png"}
+             "ctp": "logos/comp-ctp.png", "mvp": "logos/comp-mvp.png"}
 
 
 def export_comps(c):

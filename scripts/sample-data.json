@@ -352,7 +352,8 @@
   "allow": {
    "altshot": 50,
    "scrambleHigh": 15,
-   "scrambleLow": 35
+   "scrambleLow": 35,
+   "hcpPct": 90
   }
  },
  "pairings": {
@@ -682,6 +683,11 @@
    "name": "Mulcare",
    "url": "https://www.mulcare.com/",
    "imageId": "logos/comp-ctp.png"
+  },
+  "mvp": {
+   "name": "Luca Partners",
+   "url": "https://www.luca-partners.com/",
+   "imageId": "logos/comp-mvp.png"
   }
  }
 }
