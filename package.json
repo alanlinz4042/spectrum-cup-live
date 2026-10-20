@@ -8,6 +8,6 @@
     "test:unit": "python3 -m unittest discover -s tests -p 'test_*.py' -v"
   },
   "devDependencies": {
-    "@playwright/test": "1.63.0"
+    "@playwright/test": "1.64.0"
   }
 }
