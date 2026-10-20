@@ -17,7 +17,7 @@ PLAYER = {"name": "Test Player", "team": "PS", "captain": 1, "index": "11.4",
           "phone": "555-0100", "ghin": "1234567", "club": "Secret CC", "email": "x@example.com"}
 SETTINGS = {"courses": {"r1": {"name": "Ozarks National", "par": [4] * 18, "si": list(range(1, 19)),
                                "rating": 71.4, "slope": 131, "tee": "Blue"}},
-            "allow": {"altshot": 50, "scrambleHigh": 15, "scrambleLow": 35, "hcpPct": 90, "bogusKey": 1},
+            "allow": {"altshot": 50, "scrambleHigh": 15, "scrambleLow": 35, "hcpPct": 90, "hcpPctR5": 40, "bogusKey": 1},
             "mulligan": {"gfm": 50, "pot": 50, "price": 100}, "snake": {"rate": 1}, "entry": "self"}
 PAIRINGS = {"r1": [{"PS": ["p01"], "IL": ["p09"]}]}
 SPONSOR = {"name": "Sponsor Co", "url": "http://insecure.example", "imageId": "0123456789abcdef0123456789abcdef"}
@@ -97,7 +97,7 @@ class SyncTests(unittest.TestCase):
         self.assertEqual(d["players"]["p01"]["index"], 11.4)
         self.assertEqual(set(d["players"]["p01"]), {"name", "team", "captain", "index"})
         self.assertEqual(set(d["settings"]), {"courses", "allow"})
-        self.assertEqual(d["settings"]["allow"], {"altshot": 50, "scrambleHigh": 15, "scrambleLow": 35, "hcpPct": 90})
+        self.assertEqual(d["settings"]["allow"], {"altshot": 50, "scrambleHigh": 15, "scrambleLow": 35, "hcpPct": 90, "hcpPctR5": 40})
         self.assertEqual(d["pairings"], PAIRINGS)
         self.assertEqual(d["scores"]["r1_p01"], {"holes": {"1": 4, "2": 5}, "tp": {"2": 1}})
         self.assertEqual(d["side"]["mulligans"]["p01"], {"used": True, "round": "r1", "hole": 7})
