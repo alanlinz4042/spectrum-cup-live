@@ -44,9 +44,10 @@ function courseHcp(pid,rid){
   const slope=+c.slope||113;const parT=(c.par||[]).reduce((a,b)=>a+(+b||0),0)||r.holes*3;
   const rating=c.rating?+c.rating:parT;
   const full=(+p.index)*(r.holes/18)*slope/113+(rating-parT);
-  return Math.round(full*hcpPct()/100); // tournament allowance (Setup → Handicap allowance, default 90%) applied to every round
+  return Math.round(full*hcpPct(rid)/100); // tournament allowance (Setup → Handicap allowance, default 90%; Mountain Top R5 has its own, default 40%)
 }
-function hcpPct(){const v=settings&&settings.allow&&settings.allow.hcpPct;return v==null||v===''||isNaN(+v)?90:Math.max(0,Math.min(100,+v))}
+function pctOf(v,d){return v==null||v===''||isNaN(+v)?d:Math.max(0,Math.min(100,+v))}
+function hcpPct(rid){const al=(settings&&settings.allow)||{};if(rid==='r5')return pctOf(al.hcpPctR5,40);return pctOf(al.hcpPct,90)}
 function strokesOnHole(n,rid,h){ // n strokes (>=0) over the course
   const H=RBY[rid].holes;if(!n||n<=0)return 0;
   const base=Math.floor(n/H),rem=n%H;return base+(siOf(rid,h)<=rem?1:0);

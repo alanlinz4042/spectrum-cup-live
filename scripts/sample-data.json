@@ -353,7 +353,8 @@
    "altshot": 50,
    "scrambleHigh": 15,
    "scrambleLow": 35,
-   "hcpPct": 90
+   "hcpPct": 90,
+   "hcpPctR5": 40
   }
  },
  "pairings": {
