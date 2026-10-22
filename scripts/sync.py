@@ -32,6 +32,8 @@ COURSE_KEYS = ("name", "par", "si", "rating", "slope", "tee")
 ALLOW_KEYS = ("altshot", "scrambleHigh", "scrambleLow", "hcpPct", "hcpPctR5")
 TEAMS = ("PS", "IL")
 ROUND_IDS = ("r1", "r2", "r3", "r4", "r5", "r6")
+# Only Cup rounds are published. The Wednesday practice round (p0_<pid> scores, courses.p0) stays on the private board.
+SCORE_KEY_RE = re.compile(r"^r[1-6]_[A-Za-z0-9_.-]{1,64}$")
 
 
 def load_doc(path):
@@ -98,7 +100,7 @@ def export_player(p):
 def export_settings(s):
     courses = s.get("courses") if isinstance(s.get("courses"), dict) else {}
     allow = s.get("allow") if isinstance(s.get("allow"), dict) else {}
-    return {"courses": {rid: pick(c, COURSE_KEYS) for rid, c in courses.items() if isinstance(c, dict)},
+    return {"courses": {rid: pick(c, COURSE_KEYS) for rid, c in courses.items() if isinstance(c, dict) and rid in ROUND_IDS},
             "allow": pick(allow, ALLOW_KEYS)}
 
 
@@ -118,7 +120,7 @@ def export_match(m):
 def export_pairings(p):
     out = {}
     for rid, matches in (p or {}).items():
-        if not isinstance(matches, list):
+        if rid not in ROUND_IDS or not isinstance(matches, list):
             continue
         out[rid] = [export_match(m) for m in matches if isinstance(m, dict)]
     return out
@@ -221,7 +223,8 @@ def build(dump, previous=None, listed=(), carry=()):
         "pairings": section("pairings", "config", load_config(dump, "pairings") is not None,
                             lambda: export_pairings(load_config(dump, "pairings")), {}),
         "scores": section("scores", "scores", os.path.isdir(os.path.join(dump, "scores")),
-                          lambda: {k: export_score(d) for k, d in load_collection(dump, "scores").items()}, {}),
+                          lambda: {k: export_score(d) for k, d in load_collection(dump, "scores").items()
+                                   if SCORE_KEY_RE.match(k)}, {}),
         "side": section("side", "side", os.path.isdir(os.path.join(dump, "side")),
                         lambda: export_side(load_collection(dump, "side")), {}),
         "sponsor": section("sponsor", "config", load_config(dump, "sponsor") is not None,
