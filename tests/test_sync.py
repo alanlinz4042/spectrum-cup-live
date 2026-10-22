@@ -41,11 +41,13 @@ def make_dump(root, wrapped=False):
         return {"id": doc_id, "data": data, "version": "3"} if wrapped else data
     write(os.path.join(root, "players", "p01.json"), doc("p01", PLAYER))
     write(os.path.join(root, "players", "p09.json"), doc("p09", dict(PLAYER, name="Other Player", team="IL", captain=0)))
-    write(os.path.join(root, "config", "settings.json"), doc("settings", SETTINGS))
-    write(os.path.join(root, "config", "pairings.json"), doc("pairings", PAIRINGS))
+    write(os.path.join(root, "config", "settings.json"),
+          doc("settings", dict(SETTINGS, courses=dict(SETTINGS["courses"], p0={"name": "Branson Hills", "tee": "Blue", "out": ["p09"]}))))
+    write(os.path.join(root, "config", "pairings.json"), doc("pairings", dict(PAIRINGS, p0=[{"PS": ["p01"], "IL": []}])))
     write(os.path.join(root, "config", "sponsor.json"), doc("sponsor", SPONSOR))
     write(os.path.join(root, "config", "comps.json"), doc("comps", COMP_SPONSORS))
     write(os.path.join(root, "scores", "r1_p01.json"), doc("r1_p01", SCORE))
+    write(os.path.join(root, "scores", "p0_p01.json"), doc("p0_p01", SCORE))  # Wednesday practice round: never published
     write(os.path.join(root, "side", "mulligans.json"), doc("mulligans", MULL))
     write(os.path.join(root, "side", "comps.json"), doc("comps", COMPS))
     write(os.path.join(root, "bets", "p1.json"), doc("p1", {"kind": "prop", "by": "p01", "pid": "p09", "prop": "Makes this putt", "stake": 5, "yes": {"p01": 1}}))
@@ -63,6 +65,14 @@ class SyncTests(unittest.TestCase):
 
     def run_sync(self):
         return sync.run(self.dump, self.out)
+
+    def test_practice_round_is_never_published(self):
+        self.run_sync()
+        out = json.loads(self.read_out())
+        self.assertEqual(sorted(out["scores"]), ["r1_p01"])
+        self.assertNotIn("p0", out["settings"]["courses"])
+        self.assertNotIn("p0", out["pairings"])
+        self.assertNotIn("Branson Hills", json.dumps(out))
 
     def read_out(self):
         with open(self.out, encoding="utf-8") as f:
